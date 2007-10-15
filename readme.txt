@@ -1,4 +1,10 @@
-=== Postalicious Readme ===
+=== Postalicious ===
+Contributors: neop
+Donate link: http://neop.gbtopia.com/?p=108
+Tags: delicious
+Requires at least: 2.1
+Tested up to: 2.3
+Stable tag: 1.5
 
 Postalicious is a WordPress plugin that automatically posts your del.icio.us bookmarks to your blog. Postalicious uses the psuedo-cron functionality new in WordPress 2.1 to schedule automatic daily updates. If you do not have WordPress 2.1 or later installed, you will still be able to use Postalicious, but you will have to perform the updates manually.
 
