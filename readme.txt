@@ -68,11 +68,11 @@ Postalicious is very easy to use. You only need to set up your preferences and t
 * Automatically create posts in your blog with your bookmarks that allows you to keep your blog updated by just bookmarking your favorite websites!
 * Complete control over how often your bookmarks are posted and how many bookmarks should appear on each post.
 * If the post is not ready for prime time, Postalicious creates a draft with the pending bookmarks which you can publish any time or wait for Postalicious to publish it when it meets your publishing settings.
-* Full customization on the look of posts created by Postalicious, including templates for the post slog, post title, and post body.
+* Full customization on the look of posts created by Postalicious, including templates for the post slug, post title, and post body.
 * Integrates with WordPress 2.3 tags, or with Ultimate Tag Warrior and Simple Tagging plugins in earlier version of WordPress.
 * Support for del.icio.us, ma.gnolia and Google Reader.
 * Filter the bookmarks that are posted to your blog depending on how you tagged them.
-* Logs all the activity so that you now what Postalicious did and when.
+* Logs all the activity so that you know what Postalicious did and when.
 
 == Version History ==
 
