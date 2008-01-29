@@ -4,7 +4,7 @@ Donate link: http://neop.gbtopia.com/?p=108
 Tags: bookmarks, del.icio.us
 Requires at least: 2.1
 Tested up to: 2.3
-Stable tag: trunk
+Stable tag: 1.5
 
 Postalicious is a WordPress plugin that automatically posts your del.icio.us bookmarks to your blog.
 
