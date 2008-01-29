@@ -173,7 +173,7 @@ There's also some debate about MagpieRSS support vs SimplePie for future version
 
 Postalicious 2.0 introduces the ability to display dates in different formats. All of the templates in Postalicious that allow %date%, %datestart% or %dateend% now support custom formats. If used by themselves, %date%, %datestart% and %dateend% will use the default date format template to display the date. To use a custom format, you only need to add the date format you wish to be used to display the date enclosed by '{' and '}' before the second '%' sign. For example %datestart{F jS}% will be replaced by the start date using the format: 'F jS'. The formatting options are the ones used by PHP which can be found here: http://www.php.net/date . You can use as many custom dates as you want in each template, and you can combine the use of custom and default dates.
 
-=== Credits ===
+== Credits ==
 
 Plugin created by Pablo Gomez (http://neop.gbtopia.com/)
 
