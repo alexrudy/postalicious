@@ -158,7 +158,7 @@ Postalicious is very easy to use. You only need to set up your preferences and t
 * Improved handling of character encodings.
 * Switched from directly using cURL of file_get_contents to using the MagpieRSS version included in WordPress which uses Snoopy to fetch the RSS feeds.
 * Improved the handling of tags, many tag-related bugs were solved.
-* Added some safety checks to prevent function redeclaring if the plugin was loaded twice and to prevent Potalicious from starting an update while an update is already in progress.
+* Added some safety checks to prevent function redeclaring if the plugin was loaded twice and to prevent Postalicious from starting an update while an update is already in progress.
 * Note: Although I did some extensive bug testing to try to find as many bugs as possible, it's likely that a few bugs still persist which is why I decided to release this version as 2.0 release candidate 1. Please let me know if you find any bugs with this version of Postalicious.
 
 == About the rss.php file ==
@@ -167,7 +167,7 @@ Postalicious 2.0 uses the MagpieRSS version bundled with WordPress to fetch the 
 
 Important Note: Updating WordPress to a newer version will remove the modified version of rss.php so if you wish to continue using Postalicious you will have to re-install it. The version of Postalicious that can be found on my website will always contain an updated version of rss.php which works with both Postalicious and the latest WordPress version. The current modified version of rss.php is based on the rss.php file found in WordPress 2.3.2, but since the rss.php file has remained relatively unchanged in the last few versions of WordPress, then there should be no problem if you replace this file in an older version of WordPress.
 
-There's also some debate about MagpieRSS support vs SimplePie for future version of WordPress, and it might be better to bundle RSS-handling functions with Potalicious instead of changing a core WordPress file, but most people use Postalicious with del.icio.us, so this shouldn't be much of a problem for now. Future version of Postalicious might take a different approach to solving this problem though.
+There's also some debate about MagpieRSS support vs SimplePie for future version of WordPress, and it might be better to bundle RSS-handling functions with Postalicious instead of changing a core WordPress file, but most people use Postalicious with del.icio.us, so this shouldn't be much of a problem for now. Future version of Postalicious might take a different approach to solving this problem though.
 
 == Custom date formats ==
 
