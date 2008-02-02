@@ -3,7 +3,7 @@
 Plugin Name: Postalicious
 Plugin URI: http://neop.gbtopia.com/?p=108
 Description: Automatically create posts with your del.icio.us bookmarks.
-Version: 2.0rc1
+Version: 2.0rc2
 Author: Pablo Gomez
 Author URI: http://neop.gbtopia.com
 */
@@ -12,7 +12,7 @@ if (!function_exists('neop_pstlcs_options')) :
 function neop_pstlcs_options() {
 	require_once (ABSPATH . WPINC . '/rss.php');
 	global $wpdb, $wp_db_version, $utw, $STagging;
-	$numusers = $wpdb->query("SELECT $wpdb->users.ID, $wpdb->users.display_name FROM $wpdb->users,$wpdb->usermeta WHERE $wpdb->users.ID = $wpdb->usermeta.user_id && $wpdb->usermeta.meta_key = 'wp_user_level' && $wpdb->usermeta.meta_value > 1 ORDER BY $wpdb->users.display_name");
+	$numusers = $wpdb->query("SELECT $wpdb->users.ID, $wpdb->users.display_name FROM $wpdb->users,$wpdb->usermeta WHERE $wpdb->users.ID = $wpdb->usermeta.user_id && $wpdb->usermeta.meta_key = '{$wpdb->prefix}user_level' && $wpdb->usermeta.meta_value > 1 ORDER BY $wpdb->users.display_name");
 	$userids = $wpdb->get_col(NULL,0);
 	$userdisplayn = $wpdb->get_col(NULL,1);
 	if($wp_db_version >= 6124) {
@@ -42,11 +42,12 @@ function neop_pstlcs_options() {
 			$username = urlencode(get_option('nd_username'));
 			if(!($service = get_option('nd_service'))) $service = 0;
 			if($username) {
-				switch($service) {
+				switch($service) { // [SERVICE]
 					case 0 : $rssurl = "http://del.icio.us/rss/$username"; break; // del.icio.us
 					case 1 : $rssurl = "http://ma.gnolia.com/rss/lite/people/$username"; break; // ma.gnolia
 					case 2 : $rssurl = get_option('nd_username'); break; // Google Reader
 					case 3 : $rssurl = get_option('nd_username'); break; // Google Bookmarks
+					case 4 : $rssurl = get_option('nd_username'); break; // Reddit
 				}
 				$feed = fetch_rss($rssurl);
 				if(!$feed) { 
@@ -120,7 +121,8 @@ function neop_pstlcs_options() {
 		$nd_maxcount = $_POST['nd_maxcount'];
 		if($nd_mincount > $nd_maxcount) {
 			if($message != '') $message .= '<br />';
-			$message .= 'The maximum number of bookmarks per post should be a greater than the minimum.';
+			$message .= 'The maximum number of bookmarks per post should be a greater or equal than the minimum.';
+			update_option('nd_maxcount',$nd_mincount);
 		} else update_option('nd_maxcount',$nd_maxcount);
 		
 		$nd_maxhours = $_POST['nd_maxhours'];
@@ -225,12 +227,15 @@ function neop_pstlcs_options() {
 	
 	if(!($nd_log = get_option('nd_log'))) $nd_log = 'There is no logged activity.';
 	
+	// [SERVICE]
 	$tagsdisabled = 0;
-	if(MAGPIE_MOD_VERSION != 'neop' && $nd_service == 1) $tagsdisabled = 1;
-	else if($nd_service == 2) $tagsdisabled = 1;
+	if(MAGPIE_MOD_VERSION != 'neop' && $nd_service == 1) $tagsdisabled = 2;
+	else if($nd_service == 2 || $nd_service == 4) $tagsdisabled = 1;
+	$urlservice = 0;
+	if($nd_service >= 2) $urlservice = 1;
 	
 ?>
-	<div class=wrap>
+	<div class="wrap">
 		<div style="background: <?php if($nd_hourlyupdates == 1) echo "#cf9"; else echo "#f99"; ?> 1em; border: 1px solid <?php if($nd_hourlyupdates == 1) echo "#green"; else echo "#red"; ?>; margin:1em; padding:1em;">
 		<table width="100%"><tr><td>
 <?php
@@ -238,16 +243,17 @@ function neop_pstlcs_options() {
 		if($nd_hourlyupdates == 1) {
 			echo "Automatic hourly updates are active.";
 			if($nd_lastrun) echo ' <b>Last update:</b> ' . mysql2date('F j, Y G:i',date('Y-m-d H:i:s',$nd_lastrun));
-			echo '</td><td align="right"><form method="post" style="display:inline;"><input type="submit" name="nd_update" value="Update Now"></form>&nbsp;&nbsp;<form method="post" style="display:inline;"><input type="submit" name="nd_hourly_deactivate" value="Deactivate Hourly Updates"></form>';
+			echo '</td><td align="right"><form method="post" action="'.$_SERVER["REQUEST_URI"].'" style="display:inline;"><input type="submit" name="nd_update" value="Update Now" /></form>&nbsp;&nbsp;<form method="post" action="'.$_SERVER["REQUEST_URI"].'" style="display:inline;"><input type="submit" name="nd_hourly_deactivate" value="Deactivate Hourly Updates" /></form>';
 		} else {
 			echo "Automatic hourly updates are not activated.";
-			echo '</td><td align="right"><form method="post" style="display:inline;"><input type="submit" name="nd_update" value="Update Now"></form>&nbsp;&nbsp;<form method="post" style="display:inline;"><input type="submit" name="nd_hourly_activate" value="Activate Hourly Updates"></form>';
+			echo '</td><td align="right"><form method="post" action="'.$_SERVER["REQUEST_URI"].'" style="display:inline;"><input type="submit" name="nd_update" value="Update Now" /></form>&nbsp;&nbsp;<form method="post" action="'.$_SERVER["REQUEST_URI"].'" style="display:inline;"><input type="submit" name="nd_hourly_activate" value="Activate Hourly Updates" /></form>';
 		}
 ?>
 		</td></tr></table>
 		</div>
 		<br />
-		<script language="javascript">
+		<script type="text/javascript">
+		//<![CDATA[
 		<?php
 			if(MAGPIE_MOD_VERSION == 'neop') echo "var nd_magpieupdated = true;";
 			else echo "var nd_magpieupdated = false;";
@@ -255,86 +261,102 @@ function neop_pstlcs_options() {
 		?>
 		var nd_whitelist_tags,nd_blacklist_tags,nd_bookmark_tags;
 		
-		function mgnp_toggle() {
+		function nd_servicechanged() {
 			oldservice = nd_service_js;
-			if(document.getElementById('nd_service_0').checked) {
-				nd_service_js = 0;
-				if(oldservice == 2 || (oldservice == 1 && !nd_magpieupdated)) mgnp_enable();
-			} else if(document.getElementById('nd_service_1').checked) {
-				nd_service_js = 1;
-				if(!nd_magpieupdated) mgnp_disable();
-				else if(oldservice == 2) mgnp_enable();
-			} else if(document.getElementById('nd_service_2').checked) {
-				nd_service_js = 2;
-				mgnp_disable();
+			if(document.getElementById('nd_service_0').checked) nd_service_js = 0;
+			else if(document.getElementById('nd_service_1').checked) nd_service_js = 1;
+			else if(document.getElementById('nd_service_2').checked) nd_service_js = 2;
+			else if(document.getElementById('nd_service_4').checked) nd_service_js = 4;
+			
+			// [SERVICE]
+			nd_status = function (type,service) { // We only use this inside nd_toggle, so no need for a global function.
+				switch(type) {
+					case 'tags' :
+						if(!nd_magpieupdated && service == 1) return 2;
+						else if(service == 2 || service == 4) return 1;
+						else return 0;
+						break;
+					case 'url' :
+						if(service >= 2) return 1;
+						else return 0;
+						break;
+				}
 			}
 			
-			if(nd_service_js == 2 && oldservice != 2) {
-				document.getElementById('th_username').innerHTML = "Feed URL:";
-				document.getElementById('nd_username').size = "50";
-			} else if(oldservice == 2 && nd_service_js != 2) {
-				document.getElementById('th_username').innerHTML = "Username:";
-				document.getElementById('nd_username').size = "15";
+			// Handle the tag status
+			old_tagsdisabled = nd_status('tags',oldservice);
+			new_tagsdisabled = nd_status('tags',nd_service_js);
+			if(old_tagsdisabled != new_tagsdisabled) {
+				warning = document.getElementById('nd_rsswarning');
+				if(new_tagsdisabled != 0) { // Change the message.
+					if(new_tagsdisabled == 1) warning.innerHTML = "Tag-related features are not supported with this service.<br />Read the Postalicious FAQ for more info.";
+					else warning.innerHTML = "Tag-related features need the rss.php file to work with this service.<br />Read the Postalicious FAQ for more info.";
+					
+					if(old_tagsdisabled == 0) { // Disable tag-related features
+						whiteliste = document.getElementById('nd_whitelist');
+						blackliste = document.getElementById('nd_blacklist');
+						bookmarktagse = document.getElementById('nd_use_post_tags');
+						
+						warning.style.visibility = 'visible';
+						document.getElementById('nd_use_post_tags_head').style.color = '#999';
+						document.getElementById('nd_use_post_tags_label').style.color = '#999';
+						document.getElementById('nd_whitelist_head').style.color = '#999';
+						document.getElementById('nd_whitelist_cell').style.color = '#999';
+						document.getElementById('nd_blacklist_head').style.color = '#999';
+						document.getElementById('nd_blacklist_cell').style.color = '#999';
+						
+						document.getElementById('nd_linktemplate_content').innerHTML = "The following will be replaced with the bookmark's info: %href% - url, %title% - description, %description% - extended description and %tag% - tags ( %tags% will always be \"none\" )";
+						
+						nd_whitelist_tags = whiteliste.value;
+						nd_blacklist_tags = blackliste.value;
+						nd_bookmark_tags = bookmarktagse.checked;
+						
+						whiteliste.value = '';
+						whiteliste.disabled = true;
+						blackliste.value = '';
+						blackliste.disabled = true;
+						bookmarktagse.checked = false;
+						bookmarktagse.disabled = true;
+					}
+				} else { // Enable tag-related features
+					whiteliste = document.getElementById('nd_whitelist');
+					blackliste = document.getElementById('nd_blacklist');
+					bookmarktagse = document.getElementById('nd_use_post_tags');
+			
+					warning.style.visibility = 'hidden';
+					document.getElementById('nd_use_post_tags_head').style.color = '#000';
+					document.getElementById('nd_use_post_tags_label').style.color = '#000';
+					document.getElementById('nd_whitelist_head').style.color = '#000';
+					document.getElementById('nd_whitelist_cell').style.color = '#000';
+					document.getElementById('nd_blacklist_head').style.color = '#000';
+					document.getElementById('nd_blacklist_cell').style.color = '#000';
+					
+					document.getElementById('nd_linktemplate_content').innerHTML = "The following will be replaced with the bookmark's info: %href% - url, %title% - description, %description% - extended description and %tag% - tags";
+					
+					if(nd_whitelist_tags) whiteliste.value = nd_whitelist_tags;
+					whiteliste.disabled = false;
+					if(nd_blacklist_tags) blackliste.value = nd_blacklist_tags;
+					blackliste.disabled = false;
+					if(nd_bookmark_tags) bookmarktagse.checked = nd_bookmark_tags;
+					bookmarktagse.disabled = false;
+				}
+			}
+			
+			old_urlservice = nd_status('url',oldservice);
+			new_urlservice = nd_status('url',nd_service_js);
+			
+			if(old_urlservice != new_urlservice) {
+				if(new_urlservice == 1) {
+					document.getElementById('th_username').innerHTML = "Feed URL:";
+					document.getElementById('nd_username').size = "50";
+				} else {
+					document.getElementById('th_username').innerHTML = "Username:";
+					document.getElementById('nd_username').size = "15";
+				}
 			}
 		}
 		
-		function mgnp_disable() {
-			whiteliste = document.getElementById('nd_whitelist');
-			blackliste = document.getElementById('nd_blacklist');
-			bookmarktagse = document.getElementById('nd_use_post_tags');
-			
-			if(nd_service_js == 1)
-				document.getElementById('nd_rsswarning').style.visibility = 'visible';
-			else if(nd_service_js == 2)
-				document.getElementById('greaderopt').innerHTML = 'Google Reader <span style="color:#f00;">(tag-related features are not available with Google Reader)</span>';
-			
-			
-			document.getElementById('nd_use_post_tags_head').style.color = '#999';
-			document.getElementById('nd_use_post_tags_label').style.color = '#999';
-			document.getElementById('nd_whitelist_head').style.color = '#999';
-			document.getElementById('nd_whitelist_cell').style.color = '#999';
-			document.getElementById('nd_blacklist_head').style.color = '#999';
-			document.getElementById('nd_blacklist_cell').style.color = '#999';
-			
-			document.getElementById('nd_linktemplate_content').innerHTML = "The following will be replaced with the bookmark's info: %href% - url, %title% - description, %description% - extended description and %tag% - tags ( %tags% will always be \"none\" )";
-			
-			nd_whitelist_tags = whiteliste.value;
-			nd_blacklist_tags = blackliste.value;
-			nd_bookmark_tags = bookmarktagse.checked;
-			
-			whiteliste.value = '';
-			whiteliste.disabled = true;
-			blackliste.value = '';
-			blackliste.disabled = true;
-			bookmarktagse.checked = false;
-			bookmarktagse.disabled = true;
-		}
-		function mgnp_enable() {
-			whiteliste = document.getElementById('nd_whitelist');
-			blackliste = document.getElementById('nd_blacklist');
-			bookmarktagse = document.getElementById('nd_use_post_tags');
-			
-			document.getElementById('nd_rsswarning').style.visibility = 'hidden';
-			if(nd_service_js != 2 && nd_magpieupdated) document.getElementById('greaderopt').innerHTML = 'Google Reader';
-				
-			
-			document.getElementById('nd_use_post_tags_head').style.color = '#000';
-			document.getElementById('nd_use_post_tags_label').style.color = '#000';
-			document.getElementById('nd_whitelist_head').style.color = '#000';
-			document.getElementById('nd_whitelist_cell').style.color = '#000';
-			document.getElementById('nd_blacklist_head').style.color = '#000';
-			document.getElementById('nd_blacklist_cell').style.color = '#000';
-			
-			document.getElementById('nd_linktemplate_content').innerHTML = "The following will be replaced with the bookmark's info: %href% - url, %title% - description, %description% - extended description and %tag% - tags";
-			
-			if(nd_whitelist_tags) whiteliste.value = nd_whitelist_tags;
-			whiteliste.disabled = false;
-			if(nd_blacklist_tags) blackliste.value = nd_blacklist_tags;
-			blackliste.disabled = false;
-			if(nd_bookmark_tags) bookmarktagse.checked = nd_bookmark_tags;
-			bookmarktagse.disabled = false;
-		}
-		function nstt_toggle() {
+		function nd_limitchanged() {
 			if(document.getElementById('nd_limit_1').checked && document.getElementById('nd_maxcount').value == 1) {
 				document.getElementById('nd_titlesingle_span').innerHTML = "%datestart% and %dateend% will be replaced by the oldest and newest dates of the bookmarks in the post. %title% will be replaced by the bookmark's title.";
 				document.getElementById('nd_slugtemplate_span').innerHTML = "%datestart% and %dateend% will be replaced by the oldest and newest dates of the bookmarks in the post. %title% will be replaced by the bookmark's title.";
@@ -376,41 +398,35 @@ function neop_pstlcs_options() {
 				req.send("nd_clearlog=1");
 			} else clogspan.innerHTML = "Could not clear the log.";
 		}
-		
+		//]]>
 		</script>
-		<form method="post">
+		<form method="post" action="<?php echo $_SERVER["REQUEST_URI"]; ?>">
 			<h2>Postalicious options</h2>
 			<div class="submit"><input type="submit" name="info_update" value="Update Options &raquo;" /></div>
 			<fieldset class="options">
 				<legend>Account Information</legend>
 				<table width="100%" cellspacing="2" cellpadding="5" class="optiontable editform"> 
-				
 				<tr>
 				<th scope="row">Account type:</th>
 				<td>
-				<label><input id="nd_service_0" name="nd_service" type="radio" value="0" <?php if($nd_service == 0) echo 'checked="checked"' ?> onchange="mgnp_toggle();" />
+				<label><input id="nd_service_0" name="nd_service" type="radio" value="0" <?php if($nd_service == 0) echo 'checked="checked"' ?> onchange="nd_servicechanged();" />
 				del.icio.us</label><br />
-				<label><input id="nd_service_1" name="nd_service" type="radio" value="1" <?php if($nd_service == 1) echo 'checked="checked"' ?> onchange="mgnp_toggle();" />
+				<label><input id="nd_service_1" name="nd_service" type="radio" value="1" <?php if($nd_service == 1) echo 'checked="checked"' ?> onchange="nd_servicechanged();" />
 				ma.gnolia</label><br />
-				<label><input id="nd_service_2" name="nd_service" <?php if(MAGPIE_MOD_VERSION != 'neop') echo "disabled " ?>type="radio" value="2" <?php if($nd_service == 2) echo 'checked="checked"' ?> onchange="mgnp_toggle();" />
-				<span id="greaderopt"><?php 
-				if(MAGPIE_MOD_VERSION == 'neop') { 
-					if($nd_service == 2)
-						echo 'Google Reader <span style="color:#f00;">(tag-related features are not available with Google Reader)</span>';
-					else echo "Google Reader";
-				}
-				else 
-					echo '<span style="color:#999;">Google Reader (disabled)</span>';
-				?></span></label>
+				<label><input id="nd_service_2" name="nd_service" <?php if(MAGPIE_MOD_VERSION != 'neop') echo "disabled='disabled' " ?>type="radio" value="2" <?php if($nd_service == 2) echo 'checked="checked"' ?> onchange="nd_servicechanged();" />
+				<?php 
+				if(MAGPIE_MOD_VERSION == 'neop') echo "Google Reader<br />";
+				else echo '<span style="color:#999;">Google Reader (disabled)</span><br />';
+				?></label>
+				<label><input id="nd_service_4" name="nd_service" type="radio" value="4" <?php if($nd_service == 4) echo 'checked="checked"' ?> onchange="nd_servicechanged();" />
+				Reddit</label>
 				</td>
-				<td id="nd_rsswarning" style="color:#f00; visibility:<?php if(MAGPIE_MOD_VERSION != 'neop' && $nd_service == 1) echo 'visible'; else echo 'hidden'; ?>">Tag-related features have been disabled because the modified rss.php is not installed.<br />Read the Postalicious FAQ for more info.
-				</td>
+				<td id="nd_rsswarning" style="color:#f00; visibility:<?php if($tagsdisabled > 0) echo 'visible'; else echo 'hidden'; ?>"><?php  if($tagsdisabled == 1) echo 'Tag-related features are not supported with this service.'; else if($tagsdisabled == 2) echo 'Tag-related features need the rss.php file to work with this service.'; ?><br />Read the Postalicious FAQ for more info.</td>
 				</tr>
-				
 				<tr valign="top"> 
-				<th id="th_username"><?php if($nd_service >= 2) echo "Feed URL:"; else echo "Username:";?></th> 
-				<td>
-				<input name="nd_username" type="text" id="nd_username" value="<?php echo $nd_username; ?>" size="<?php if($nd_service >= 2) echo "50"; else echo "15";?>" />
+				<th id="th_username"><?php if($urlservice) echo "Feed URL:"; else echo "Username:";?></th> 
+				<td colspan="2">
+				<input name="nd_username" type="text" id="nd_username" value="<?php echo $nd_username; ?>" size="<?php if($urlservice) echo "50"; else echo "15";?>" />
 				</td></tr>
 				</table>
 			</fieldset>
@@ -423,12 +439,11 @@ function neop_pstlcs_options() {
 				for($i=0;$i<$numusers;$i++) {
 					$currentid = $userids[$i];
 					if($currentid == $selecteduser)
-						echo "<option value='$currentid' selected>{$userdisplayn[$i]}</option>";
+						echo "<option value='$currentid' selected='selected'>{$userdisplayn[$i]}</option>";
 					else
 						echo "<option value='$currentid'>{$userdisplayn[$i]}</option>";
 				}
-				?></select></td>
-				<tr>
+				?></select></td></tr>
 				<tr valign="top"> 
 				<th scope="row">Post in categories:</th>
 				<td><?php
@@ -437,10 +452,10 @@ function neop_pstlcs_options() {
 						$currentcat = $categories[$i]->cat_ID;
 						if(strpos($selectedcatlist,','.$currentcat.',') !== FALSE)
 							echo "<input name='nd_postincat_$currentcat' type='checkbox' id='nd_postincat_$currentcat' checked='checked' />
-				{$categories[$i]->cat_name}   </label>";
+				<label>{$categories[$i]->cat_name}   </label>";
 						else
 							echo "<input name='nd_postincat_$currentcat' type='checkbox' id='nd_postincat_$currentcat' />
-				{$categories[$i]->cat_name}   </label>";
+				<label>{$categories[$i]->cat_name}   </label>";
 					}
 				} else {
 					for($i=0;$i<$numcats;$i++) {
@@ -479,17 +494,16 @@ function neop_pstlcs_options() {
 				<tr>
 				<th scope="row">Limit posts by: </th>
 				<td>
-				<label><input name="nd_limit" onchange="nstt_toggle()"  type="radio" value="2" <?php if($nd_limit == 2) echo 'checked="checked"' ?> />
+				<label><input name="nd_limit" onchange="nd_limitchanged()"  type="radio" value="2" <?php if($nd_limit == 2) echo 'checked="checked"' ?> />
 				No limit</label><br />
-				<label><input id="nd_limit_1" name="nd_limit" onchange="nstt_toggle()" type="radio" value="1" <?php if($nd_limit == 1) echo 'checked="checked"' ?> />
-				At most <input name="nd_maxcount" type="text" id="nd_maxcount" onchange="nstt_toggle()" value="<?php echo $nd_maxcount; ?>" size="3" /> bookmarks per post.</label><br />
-				<label><input name="nd_limit" onchange="nstt_toggle()" type="radio" value="3" <?php if($nd_limit == 3) echo 'checked="checked"' ?>  />
+				<label><input id="nd_limit_1" name="nd_limit" onchange="nd_limitchanged()" type="radio" value="1" <?php if($nd_limit == 1) echo 'checked="checked"' ?> />
+				At most <input name="nd_maxcount" type="text" id="nd_maxcount" onchange="nd_limitchanged()" value="<?php echo $nd_maxcount; ?>" size="3" /> bookmarks per post.</label><br />
+				<label><input name="nd_limit" onchange="nd_limitchanged()" type="radio" value="3" <?php if($nd_limit == 3) echo 'checked="checked"' ?>  />
 				Keep at least <input name="nd_maxhours" type="text" id="nd_maxhours" value="<?php echo $nd_maxhours; ?>" size="3" /> hours between posts.</label><br />
-				<label><input name="nd_limit" onchange="nstt_toggle()" type="radio" value="0" <?php if($nd_limit == 0) echo 'checked="checked"' ?>  />
-				Only post once every <input name="nd_maxdays" type="text" id="nd_maxdays" value="<?php echo $nd_maxdays; ?>" size="3" /> days after <input name="nd_max0hour" type="text" id="nd_max0hour" value="<?php echo $nd_max0hour; ?>" size="2" />:<input name="nd_max0mins" type="text" id="nd_max0mins" value="<?php echo $nd_max0mins; ?>" size="2" />&nbsp;<select name="nd_max0meridian"><option value="1"<?php if($nd_max0meridian == 1) echo ' selected'; ?>>am</option><option value="2"<?php if($nd_max0meridian == 2) echo ' selected'; ?>>pm</option></select>.</label>
+				<label><input name="nd_limit" onchange="nd_limitchanged()" type="radio" value="0" <?php if($nd_limit == 0) echo 'checked="checked"' ?>  />
+				Only post once every <input name="nd_maxdays" type="text" id="nd_maxdays" value="<?php echo $nd_maxdays; ?>" size="3" /> days after <input name="nd_max0hour" type="text" id="nd_max0hour" value="<?php echo $nd_max0hour; ?>" size="2" />:<input name="nd_max0mins" type="text" id="nd_max0mins" value="<?php echo $nd_max0mins; ?>" size="2" />&nbsp;<select name="nd_max0meridian"><option value="1"<?php if($nd_max0meridian == 1) echo ' selected="selected"'; ?>>am</option><option value="2"<?php if($nd_max0meridian == 2) echo ' selected="selected"'; ?>>pm</option></select>.</label>
 				</td>
 				</tr>
-				<tr>
 				<tr>
 				<th scope="row">Post status:</th>
 				<td>
@@ -514,15 +528,15 @@ function neop_pstlcs_options() {
 				(Comma separated list) example: a,p,br
 				</td></tr>
 				<tr valign="top"> 
-				<th <?php if($tagsdisabled) echo 'style="color:#999;"'; ?> id="nd_whitelist_head">Only post bookmarks that have any of the following tags:</th> 
-				<td <?php if($tagsdisabled) echo 'style="color:#999;"'; ?> id="nd_whitelist_cell">
-				<input name="nd_whitelist" type="text" id="nd_whitelist" <?php if($tagsdisabled) echo 'disabled '; ?>value="<?php echo $nd_whitelist; ?>" size="50" /><br />
+				<th <?php if($tagsdisabled > 0) echo 'style="color:#999;"'; ?> id="nd_whitelist_head">Only post bookmarks that have any of the following tags:</th> 
+				<td <?php if($tagsdisabled > 0) echo 'style="color:#999;"'; ?> id="nd_whitelist_cell">
+				<input name="nd_whitelist" type="text" id="nd_whitelist" <?php if($tagsdisabled > 0) echo 'disabled="disabled" '; ?>value="<?php echo $nd_whitelist; ?>" size="50" /><br />
 				(Comma separated list)
 				</td></tr>
 				<tr valign="top"> 
-				<th <?php if($tagsdisabled) echo 'style="color:#999;"'; ?> id="nd_blacklist_head">Do not post bookmarks that have any of the following tags:</th> 
-				<td <?php if($tagsdisabled) echo 'style="color:#999;"'; ?> id="nd_blacklist_cell">
-				<input name="nd_blacklist" type="text" id="nd_blacklist" <?php if($tagsdisabled) echo 'disabled '; ?>value="<?php echo $nd_blacklist; ?>" size="50" /><br />
+				<th <?php if($tagsdisabled > 0) echo 'style="color:#999;"'; ?> id="nd_blacklist_head">Do not post bookmarks that have any of the following tags:</th> 
+				<td <?php if($tagsdisabled > 0) echo 'style="color:#999;"'; ?> id="nd_blacklist_cell">
+				<input name="nd_blacklist" type="text" id="nd_blacklist" <?php if($tagsdisabled > 0) echo 'disabled="disabled" '; ?>value="<?php echo $nd_blacklist; ?>" size="50" /><br />
 				(Comma separated list)
 				</td></tr>
 				</table>
@@ -545,9 +559,9 @@ function neop_pstlcs_options() {
 				</td>
 				</tr>
 				<tr valign="top"> 
-				<th <?php if($tagsdisabled) echo 'style="color:#999;"'; ?> id="nd_use_post_tags_head">bookmark's tags:</th> 
+				<th <?php if($tagsdisabled > 0) echo 'style="color:#999;"'; ?> id="nd_use_post_tags_head">bookmark's tags:</th> 
 				<td>
-				<label <?php if($tagsdisabled) echo 'style="color:#999;"'; ?>  id="nd_use_post_tags_label"><input name="nd_use_post_tags" type="checkbox" id="nd_use_post_tags" <?php if($tagsdisabled) echo 'disabled '; if($nd_use_post_tags == 1) echo 'checked="checked"' ?> />
+				<label <?php if($tagsdisabled > 0) echo 'style="color:#999;"'; ?>  id="nd_use_post_tags_label"><input name="nd_use_post_tags" type="checkbox" id="nd_use_post_tags" <?php if($tagsdisabled > 0) echo 'disabled="disabled" '; if($nd_use_post_tags == 1) echo 'checked="checked"' ?> />
 				Use the bookmark's tags as tags for the post in which the bookmark appears.</label>
 				</td>  
 				</tr> 
@@ -576,7 +590,6 @@ function neop_pstlcs_options() {
 				<input name="nd_slugtemplate" type="text" id="nd_slugtemplate" value="<?php echo $nd_slugtemplate; ?>" size="30" /><br />
 				<span id="nd_slugtemplate_span">%datestart% and %dateend% will be replaced by the oldest and newest dates of the bookmarks in the post.<?php if($nd_limit == 1 && $nd_maxcount == 1) echo " %title% will be replaced by the bookmark's title."; ?></span>
 				</td></tr>
-
 				<tr valign="top"> 
 				<th>Post title (single day):</th> 
 				<td>
@@ -615,8 +628,8 @@ function neop_pstlcs_options() {
 			</fieldset>
 			<fieldset class="options">
 			<legend>Activity Log</legend>
-			<textarea readonly name="nd_log" id="nd_log" style="width: 98%;" rows="20" cols="50"><?php echo $nd_log; ?></textarea>
-			<input type="button" value="Clear Log" onClick="nd_clearthelog()"><span id="nd_clogspan" style="margin-left:5px;"></span>
+			<textarea readonly="readonly" name="nd_log" id="nd_log" style="width: 98%;" rows="20" cols="50"><?php echo $nd_log; ?></textarea>
+			<input type="button" value="Clear Log" onclick="nd_clearthelog()" /><span id="nd_clogspan" style="margin-left:5px;"></span>
 			</fieldset>
 			<div class="submit"><input type="submit" name="info_update" value="Update Options &raquo;" /></div>
 		</form>
@@ -719,13 +732,13 @@ function neop_pstlcs_post_new($automatic = 1) {
 	$username = urlencode(get_option('nd_username'));
 
 	if(!($service = get_option('nd_service'))) $service = 0;
-	if($username) {
-		
+	if($username) { // [SERVICE]
 		switch($service) {
 			case 0 : $rssurl = "http://del.icio.us/rss/$username"; break; // del.icio.us
 			case 1 : $rssurl = "http://ma.gnolia.com/rss/lite/people/$username"; break; // ma.gnolia
 			case 2 : $rssurl = get_option('nd_username'); break; // Google Reader
 			case 3 : $rssurl = get_option('nd_username'); break; // Google Bookmarks
+			case 4 : $rssurl = get_option('nd_username'); break; // Reddit
 		}
 	}
 	else {
@@ -744,6 +757,8 @@ function neop_pstlcs_post_new($automatic = 1) {
 	if($draftid != -1) { 
 		$draftstatus = $wpdb->get_var("SELECT post_status FROM $wpdb->posts WHERE ID = $draftid ORDER BY ID DESC LIMIT 1");
 		if($draftstatus == 'draft' || $draftstatus == 'future' || ($draftstatus == 'publish' && $nd_publishbehaviour == 1)) {
+			if($draftstatus == 'publish') $publishedpost = 1;
+			else $publishedpost = 0;
 			$currentpost = $draftid;
 			if(!($nd_unpublishedcount = get_option('nd_unpublishedcount'))) $nd_unpublishedcount = 0;
 			$count = $nd_unpublishedcount;
@@ -751,7 +766,6 @@ function neop_pstlcs_post_new($automatic = 1) {
 			$dateend = get_option('nd_draftdate2');
 		}
 	}
-	
 	
 	$lastupdate = get_option('nd_lastupdate');
 	$feed = fetch_rss($rssurl);
@@ -803,17 +817,24 @@ function neop_pstlcs_post_new($automatic = 1) {
 		// Prepare the arrays allow html tags.
 		$pattern = array();
 		$replacement = array();
-		if($nd_htmltags = get_option('nd_htmltags')) {
+		$nd_htmltags = get_option('nd_htmltags');
+		if($service == 4) $nd_htmltags = 'a'; // [SERVICE] Reddit needs the a tag to be allowed. The user tags are irrelevant.
+		if($nd_htmltags) {
+			$nd_htmltags = preg_replace('/\s*,\s*/',',',$nd_htmltags); // Remove spaces before and after commas.
+  			$nd_htmltags = trim($nd_htmltags); // Remove spaces at the start and end of the string.
+  			$nd_htmltags = preg_replace('/,,+/',',',$nd_htmltags); // Remove consecutive commas.
 			$htmltagarray = explode(',',$nd_htmltags);
+			$htmltagarray = array_flip(array_flip($htmltagarray)); // Remove duplicates.
 			foreach($htmltagarray as $tag) {
 				$tag = trim($tag);
 				array_push($pattern,"/&lt;\s*$tag(.*?)&gt;/ise","/&lt;\s*\/\s*$tag\s*&gt;/is");
-				array_push($replacement,"'<$tag'.html_entity_decode('$1').'>'","</$tag>");
+				array_push($replacement,"'<$tag'.@html_entity_decode('$1',ENT_QUOTES,'UTF-8').'>'","</$tag>");
 			}
-		} else $nd_htmltags = '';
+		}
 		
 		foreach(array_reverse($feed->items) as $item) {
-			switch($service) { 
+			// Consolidate the info from the feed in a single array so that we can use that instead of the service specific ones.
+			switch($service) { // [SERVICE]
 				case 0: // del.icio.us
 					$bookmark[title] = $item[title];
 					$bookmark[link] = $item[link];
@@ -856,15 +877,29 @@ function neop_pstlcs_post_new($automatic = 1) {
 					if(isset($item[smh][mgpn_bkmk_label_array])) $bookmark[tags] = implode(',',$item[smh][mgpn_bkmk_label_array]);
 					else $bookmark[tags] = $item[smh][bkmk_label];
 					break;
+				case 4 : // Reddit
+					$bookmark[title] = $item[title];
+					$bookmark[link] = $item[link];
+					$bookmark[description] = $item[description];
+					$bookmark[date] = $item[dc][date];
+					$bookmark[tags] = '';
+					break;
 			}
 			
 			$ptime = strtotime($bookmark[date]);
 			
+			// strtotime seems to have some problems with certain dates in some PHP installations, so let's have some fallback code
+			if($ptime == -1 || $ptime === false) {
+				if($service == 0 || $service == 2) { // [SERVICE]
+					$timea = explode(':',substr($bookmark[date],11,8));
+					$datea = explode('-',substr($bookmark[date],0,10));
+					$ptime = gmmktime($timea[0],$timea[1],$timea[2],$datea[1],$datea[2],$datea[0]);
+				}
+			}
+			
 			$filtered = 0;
 			if($ptime > $lastupdate) { // If check posts newer than the last update time.
 				$totalcount++;
-				// Consolidate the info from the feed in a single array so that we can use that instead of the service specific ones.
-				
 				$ftags = explode(',',$bookmark[tags]);
 				if($nd_whitelist == ',,') $filtered = 1;
 				else {
@@ -893,10 +928,18 @@ function neop_pstlcs_post_new($automatic = 1) {
 				
 				$currentlink = $nd_linktemplate;
 				$currentlink = str_replace("%href%",$bookmark[link],$currentlink);
-				$currentlink = str_replace("%title%",htmlentities($bookmark[title],NULL,"UTF-8",FALSE),$currentlink);
-				// Add the description to $currentlink but with the proper html tags escaped.
-				$currentlink = str_replace("%description%",preg_replace($pattern,$replacement,htmlentities($bookmark[description],NULL,"UTF-8",FALSE)),$currentlink);
-				
+				if(version_compare(PHP_VERSION,'5.2.3',">=")) {
+					$currentlink = str_replace("%title%",htmlentities($bookmark[title],NULL,"UTF-8",FALSE),$currentlink);
+					// Add the description to $currentlink but with the proper html tags escaped.
+					$currentlink = str_replace("%description%",preg_replace($pattern,$replacement,htmlentities($bookmark[description],ENT_QUOTES,"UTF-8",FALSE)),$currentlink);
+				} else {
+					$tempvar = @html_entity_decode($bookmark[title],ENT_QUOTES,"UTF-8");
+					$tempvar = htmlentities($tempvar,ENT_QUOTES,"UTF-8");
+					$currentlink = str_replace("%title%",$tempvar,$currentlink);
+					$tempvar = @html_entity_decode($bookmark[description],ENT_QUOTES,"UTF-8");
+					$tempvar = htmlentities($tempvar,ENT_QUOTES,"UTF-8");
+					$currentlink = str_replace("%description%",preg_replace($pattern,$replacement,$tempvar),$currentlink);
+				}
 				// Replace dates
 				if(!($nd_datetemplate = get_option('nd_datetemplate'))) $nd_datetemplate = 'F jS';
 				
@@ -907,17 +950,23 @@ function neop_pstlcs_post_new($automatic = 1) {
 				
 				$tag = '';
 				if($bookmark[tags] != '') {
-					switch($service) {
+					switch($service) { // [SERVICE]
 						case 0 : $nd_site_tagurl = 'http://del.icio.us/'.urlencode($username).'/'; break; //del.icio.us
 						case 1 : $nd_site_tagurl = 'http://ma.gnolia.com/people/'.urlencode($username).'/tags/'; break; // ma.gnolia
 						case 2 : $nd_site_tagurl = '#'; break; // Google Reader (we should never get here)
 						case 3 : $nd_site_tagurl = '#'; break; // Google Bookmarks does not have a public tag url.
+						case 4 : $nd_site_tagurl = '#'; break; // Reddit (we should never get here)
 					}
 					$tags = explode(',',$bookmark[tags]);
 					foreach($tags as $t) {
 						$currenttag = $nd_tagtemplate;
 						$currenttag = str_replace("%tagurl%",$nd_site_tagurl.urlencode($t),$currenttag);
-						$currenttag = str_replace("%tagname%",htmlentities($t,NULL,"UTF-8",FALSE),$currenttag);
+						if(version_compare(PHP_VERSION,'5.2.3',">=")) $currenttag = str_replace("%tagname%",htmlentities($t,ENT_QUOTES,"UTF-8",FALSE),$currenttag);
+						else {
+							$tempvar = @html_entity_decode($t,ENT_QUOTES,"UTF-8");
+							$tempvar = htmlentities($tempvar,ENT_QUOTES,"UTF-8");
+							$currenttag = str_replace("%tagname%",$tempvar,$currenttag);
+						}
 						$tag .= $currenttag . ' ';
 					}
 					if($nd_tagging_enabled == 1 && $nd_use_post_tags == 1) {
@@ -933,7 +982,7 @@ function neop_pstlcs_post_new($automatic = 1) {
 				
 				// Submit depending on maximum settings.
 				if($nd_limit == 1 && $count == $nd_maxcount) {
-					$newposts_array[$post_count] = array($currentpost,$newposts,$newtags,$count,$datestart,$dateend);
+					$newposts_array[$post_count] = array($currentpost,$newposts,$newtags,$count,$datestart,$dateend,$publishedpost);
 					if($nd_maxcount == 1) array_push($newposts_array[$post_count],$bookmark[title]);
 					$post_count++;
 					$currentpost = -1;
@@ -945,7 +994,7 @@ function neop_pstlcs_post_new($automatic = 1) {
 				}
 			} // If filtered
 		} // foreach items in feed
-		$newposts_array[$post_count] = array($currentpost,$newposts,$newtags,$count,$datestart,$dateend);
+		$newposts_array[$post_count] = array($currentpost,$newposts,$newtags,$count,$datestart,$dateend,$publishedpost);
 		$post_count++;
 		
 		$ccount = array(0,0,0,0);
@@ -988,11 +1037,12 @@ function neop_pstlcs_post_new($automatic = 1) {
 		
 	} else { // if lastupdate
 		foreach($feed->items as $item) {
-			switch($service) {
+			switch($service) { // [SERVICE]
 				case 0 : $bdate = $item[dc][date]; break; // del.icio.us
 				case 1 : $bdate = $item[pubdate]; break; // ma.gnolia
 				case 2 : $bdate = $item[published]; break; // Google Reader
 				case 3 : $bdate = $item[pubdate]; break; // Google Bookmarks
+				case 4 : $bdate = $item[dc][date]; break; // Reddit
 			}
 			$ptime = strtotime($bdate);
 			if(!$dateend) $dateend = $ptime;
@@ -1018,7 +1068,8 @@ function neop_pstlcs_push_post($numero,$postarray) {
 	$count = $postarray[3];
 	$rdstart = $postarray[4];
 	$rdend = $postarray[5];
-	$bookmarkt = $postarray[6];
+	$publishedpost = $postarray[6];
+	$bookmarkt = $postarray[7];
 	
 	if(!($upcount = get_option('nd_unpublishedcount'))) $upcount = 0;
 	
@@ -1075,8 +1126,14 @@ function neop_pstlcs_push_post($numero,$postarray) {
 	$postbody = str_replace("%bookmarks%",$postlinks,$postbody);
 	
 	// Replace the title if we have it
-	if($bookmarkt)
-		$posttitle = str_replace("%title%",htmlentities($bookmarkt,NULL,"UTF-8",FALSE),$posttitle);
+	if($bookmarkt) {
+		if(version_compare(PHP_VERSION,'5.2.3',">=")) $posttitle = str_replace("%title%",htmlentities($bookmarkt,ENT_QUOTES,"UTF-8",FALSE),$posttitle);
+		else {
+			$tempvar = @html_entity_decode($bookmarkt,ENT_QUOTES,"UTF-8");
+			$tempvar = htmlentities($tempvar,ENT_QUOTES,"UTF-8");
+			$posttitle = str_replace("%title%",htmlentities($tempvar,ENT_QUOTES,"UTF-8"),$posttitle);
+		}
+	}
 	
 	// Escape the body and title
 	$postbody = $wpdb->escape($postbody);
@@ -1098,7 +1155,8 @@ function neop_pstlcs_push_post($numero,$postarray) {
 	if($nd_tagging_enabled == 1) {
 		//$post_tags = $wpdb->escape(get_option('nd_post_tags')); // I think we don't need to do this.
 		$post_tags = preg_replace('/\s*,\s*/',',',$post_tags); // Remove spaces before and after commas.
-		$post_tags = trim($post_tags);
+		$post_tags = trim($post_tags); // Remove spaces at the start and end of the string.
+		$post_tags = preg_replace('/,,+/',',',$post_tags); // Remove consecutive commas.
 		$post_tags = explode(',',$post_tags);
 		$tags = $post_tags;
 		
@@ -1107,11 +1165,11 @@ function neop_pstlcs_push_post($numero,$postarray) {
   			if($postid != -1) $draft_tags = get_option('nd_drafttags') . "," . $newtags;
   			else $draft_tags = $newtags;
   			$draft_tags = preg_replace('/\s*,\s*/',',',$draft_tags); // Remove spaces before and after commas.
-  			$draft_tags = trim($draft_tags);
+  			$draft_tags = trim($draft_tags); // Remove spaces at the start and end of the string.
+  			$draft_tags = preg_replace('/,,+/',',',$draft_tags); // Remove consecutive commas.
   			$tags = array_merge(explode(',',$draft_tags) ,$post_tags);
 		}
 		$tags = array_flip(array_flip($tags)); // Remove duplicates
-		$tags = array_filter($tags); // Remove empty tags from the array.
 	}
 	
 	// Create array for wp_update_post or wp_insert_post
@@ -1124,8 +1182,14 @@ function neop_pstlcs_push_post($numero,$postarray) {
 		$nd_slugtemplate = preg_replace('/%datestart\{([^\}]*)\}%/e','mysql2date(\'$1\',date(\'Y-m-d H:i:s\',$rdstart))',$nd_slugtemplate);
 		$nd_slugtemplate = preg_replace('/%dateend\{([^\}]*)\}%/e','mysql2date(\'$1\',date(\'Y-m-d H:i:s\',$rdend))',$nd_slugtemplate);
 		// Replace the title if we have it
-		if($bookmarkt)
-			$nd_slugtemplate = str_replace("%title%",htmlentities($bookmarkt,NULL,"UTF-8",FALSE),$nd_slugtemplate);
+		if($bookmarkt) {
+			if(version_compare(PHP_VERSION,'5.2.3',">=")) $nd_slugtemplate = str_replace("%title%",htmlentities($bookmarkt,ENT_QUOTES,"UTF-8",FALSE),$nd_slugtemplate);
+			else {
+				$tempvar = @html_entity_decode($bookmarkt,ENT_QUOTES,"UTF-8");
+				$tempvar = htmlentities($tempvar,ENT_QUOTES,"UTF-8");
+				$nd_slugtemplate = str_replace("%title%",htmlentities($tempvar,ENT_QUOTES,"UTF-8"),$nd_slugtemplate);
+			}
+		}
 		// Add to the array
 		$parray['post_name'] = $nd_slugtemplate;
 	}
@@ -1176,7 +1240,7 @@ function neop_pstlcs_push_post($numero,$postarray) {
 		}	
 	}
 	
-	if($primetime) $parray['post_status'] = $nd_poststatus;
+	if($primetime && !$publishedpost) $parray['post_status'] = $nd_poststatus;
 
 	// The array is ready, use it. (Only if there's something new or if the post will be published)
 	if(!$nothingnew || $primetime) {

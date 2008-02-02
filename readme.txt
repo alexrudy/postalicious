@@ -1,7 +1,7 @@
 === Postalicious ===
 Contributors: neop
 Donate link: http://neop.gbtopia.com/?p=108
-Tags: bookmarks, del.icio.us, ma.gnolia, Google Reader
+Tags: bookmarks, del.icio.us, ma.gnolia, Google Reader, Reddit
 Requires at least: 2.1
 Tested up to: 2.3.2
 Stable tag: 2.0
@@ -76,67 +76,9 @@ Postalicious is very easy to use. You only need to set up your preferences and t
 
 == Version History ==
 
-= Version 1.05 =
+= Version 2.0rc2 =
 
-* Fixed a bug where automatic updates did not work.
-* Fixed a bug where del.icio.us usernames/passwords containing certain characters did not work with Postalicious.
-* Added CURL support to fix the problems some hosts have with file_get_contents.
-
-= Version 1.06 =
-
-* Fixed a bug where the date in single day posts was set to Jan 1, 1970.
-* Added support for localized dates.
-* Fixed a bug where some special characters (such as umlauts) were not dispayed correctly.
-* Fixed a bug where the post would always use the default category.
-
-= Version 1.07 =
-
-* Removed support for localized dates since apparently its messing up the dates for some people.
-
-= Version 1.08 =
-
-* Added back support for localized dates, now it works.
-
-= Version 1.09 =
-
-* Fixed yet more problems with dates.
-* Fixed yet more problems with special characters.
-* Fixed a bug where drafts could only be updated once.
-
-= Version 1.1 =
-
-* Improved error descriptions.
-* Other minor bug fixes.
-
-= Version 1.2 =
-
-* Fixed a bug that could cause some of the dates to be off.
-* Made some progress with encodings.
-* Fixed an bug where some HTML tags where swallowed from the templates. (Thanks Jonas!)
-
-= Version 1.21 =
-
-* Fixed a small bug I introduced in version 1.2 where too many tags where being escaped.
-* Now only users with user levels greater or equal to 6 will be able to access the Postalicious options page.
-
-= Version 1.3 =
-
-* Added support for Simple Tagging plugin. (Thanks Jonas!)
-* Added new tag template to customize the way tags are displayed (supports linking the tags page in your del.icio.us). (Thanks Jonas!)
-* Added the ability to only post bookmarks with certain tags.
-
-= Version 1.31 =
-
-* Fixed a problem introduced in version 1.3 where sometimes no bookmarks would be posted.
-
-= Version 1.5 =
-
-* Postalicious now works with WordPress 2.3.
-* Added support for WordPress 2.3 tags.
-* Added the ability to prevent bookmarks with certain tags from being posted.
-* Added a preference to choose whether you want Postalicious to post private bookmarks or not.
-* Post created by Postalicious can now have multiple categories.
-* Fixed random bugs which didnt really make any difference to the end user.
+* Fixed a bug where the user list did not show up in WordPress installations with custom table prefixes.* Fixed several issues when running Postalicious on PHP 4.** The options page is now valid XHTML1.0 Transitional. (Thanks Shelly)* Fixed some issues with the allowed HTML tags.* Added support for Reddit.* Made the service-related code more easily customizable.* Fixed a bug where Postalicious ignored the settings for what to do when a blog author publishes a draft.* Fixed a bug with updating maximum/minimum number of bookmarks per post when the minimum is greater than the maximum.
 
 = Version 2.0rc1 =
 
@@ -160,6 +102,68 @@ Postalicious is very easy to use. You only need to set up your preferences and t
 * Improved the handling of tags, many tag-related bugs were solved.
 * Added some safety checks to prevent function redeclaring if the plugin was loaded twice and to prevent Postalicious from starting an update while an update is already in progress.
 * Note: Although I did some extensive bug testing to try to find as many bugs as possible, it's likely that a few bugs still persist which is why I decided to release this version as 2.0 release candidate 1. Please let me know if you find any bugs with this version of Postalicious.
+
+= Version 1.5 =
+
+* Postalicious now works with WordPress 2.3.
+* Added support for WordPress 2.3 tags.
+* Added the ability to prevent bookmarks with certain tags from being posted.
+* Added a preference to choose whether you want Postalicious to post private bookmarks or not.
+* Post created by Postalicious can now have multiple categories.
+* Fixed random bugs which didnt really make any difference to the end user.
+
+= Version 1.31 =
+
+* Fixed a problem introduced in version 1.3 where sometimes no bookmarks would be posted.
+
+= Version 1.3 =
+
+* Added support for Simple Tagging plugin. (Thanks Jonas!)
+* Added new tag template to customize the way tags are displayed (supports linking the tags page in your del.icio.us). (Thanks Jonas!)
+* Added the ability to only post bookmarks with certain tags.
+
+= Version 1.21 =
+
+* Fixed a small bug I introduced in version 1.2 where too many tags where being escaped.
+* Now only users with user levels greater or equal to 6 will be able to access the Postalicious options page.
+
+= Version 1.2 =
+
+* Fixed a bug that could cause some of the dates to be off.
+* Made some progress with encodings.
+* Fixed an bug where some HTML tags where swallowed from the templates. (Thanks Jonas!)
+
+= Version 1.1 =
+
+* Improved error descriptions.
+* Other minor bug fixes.
+
+= Version 1.09 =
+
+* Fixed yet more problems with dates.
+* Fixed yet more problems with special characters.
+* Fixed a bug where drafts could only be updated once.
+
+= Version 1.08 =
+
+* Added back support for localized dates, now it works.
+
+= Version 1.07 =
+
+* Removed support for localized dates since apparently its messing up the dates for some people.
+
+= Version 1.06 =
+
+* Fixed a bug where the date in single day posts was set to Jan 1, 1970.
+* Added support for localized dates.
+* Fixed a bug where some special characters (such as umlauts) were not dispayed correctly.
+* Fixed a bug where the post would always use the default category.
+
+= Version 1.05 =
+
+* Fixed a bug where automatic updates did not work.
+* Fixed a bug where del.icio.us usernames/passwords containing certain characters did not work with Postalicious.
+* Added CURL support to fix the problems some hosts have with file_get_contents.
 
 == About the rss.php file ==
 
