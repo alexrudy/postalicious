@@ -3,7 +3,7 @@
 Plugin Name: Postalicious
 Plugin URI: http://neop.gbtopia.com/?p=108
 Description: Automatically create posts with your del.icio.us bookmarks.
-Version: 2.0rc2
+Version: 2.0rc3
 Author: Pablo Gomez
 Author URI: http://neop.gbtopia.com
 */
@@ -48,6 +48,7 @@ function neop_pstlcs_options() {
 					case 2 : $rssurl = get_option('nd_username'); break; // Google Reader
 					case 3 : $rssurl = get_option('nd_username'); break; // Google Bookmarks
 					case 4 : $rssurl = get_option('nd_username'); break; // Reddit
+					case 5 : $rssurl = get_option('nd_username'); break; // Yahoo Pipes
 				}
 				$feed = fetch_rss($rssurl);
 				if(!$feed) { 
@@ -230,7 +231,7 @@ function neop_pstlcs_options() {
 	// [SERVICE]
 	$tagsdisabled = 0;
 	if(MAGPIE_MOD_VERSION != 'neop' && $nd_service == 1) $tagsdisabled = 2;
-	else if($nd_service == 2 || $nd_service == 4) $tagsdisabled = 1;
+	else if($nd_service == 2 || $nd_service == 4 || $nd_service == 5) $tagsdisabled = 1;
 	$urlservice = 0;
 	if($nd_service >= 2) $urlservice = 1;
 	
@@ -273,7 +274,7 @@ function neop_pstlcs_options() {
 				switch(type) {
 					case 'tags' :
 						if(!nd_magpieupdated && service == 1) return 2;
-						else if(service == 2 || service == 4) return 1;
+						else if(service == 2 || service == 4 || service == 5) return 1;
 						else return 0;
 						break;
 					case 'url' :
@@ -419,7 +420,9 @@ function neop_pstlcs_options() {
 				else echo '<span style="color:#999;">Google Reader (disabled)</span><br />';
 				?></label>
 				<label><input id="nd_service_4" name="nd_service" type="radio" value="4" <?php if($nd_service == 4) echo 'checked="checked"' ?> onchange="nd_servicechanged();" />
-				Reddit</label>
+				Reddit</label><br />
+				<label><input id="nd_service_5" name="nd_service" type="radio" value="5" <?php if($nd_service == 5) echo 'checked="checked"' ?> onchange="nd_servicechanged();" />
+				Yahoo Pipes</label>
 				</td>
 				<td id="nd_rsswarning" style="color:#f00; visibility:<?php if($tagsdisabled > 0) echo 'visible'; else echo 'hidden'; ?>"><?php  if($tagsdisabled == 1) echo 'Tag-related features are not supported with this service.'; else if($tagsdisabled == 2) echo 'Tag-related features need the rss.php file to work with this service.'; ?><br />Read the Postalicious FAQ for more info.</td>
 				</tr>
@@ -640,11 +643,8 @@ endif;
 
 if (!function_exists('neop_pstlcs_add_options')) :
 function neop_pstlcs_add_options() {
-	global $user_level;
-	if($user_level >= 6) {
-		if (function_exists('neop_pstlcs_options')) {
-			add_options_page('Postalicious', 'Postalicious', 1, basename(__FILE__), 'neop_pstlcs_options');
-		}
+	if (function_exists('neop_pstlcs_options')) {
+		add_options_page('Postalicious', 'Postalicious', 6, 'wp-postalicious', 'neop_pstlcs_options');
 	}
 }
 endif;
@@ -739,6 +739,7 @@ function neop_pstlcs_post_new($automatic = 1) {
 			case 2 : $rssurl = get_option('nd_username'); break; // Google Reader
 			case 3 : $rssurl = get_option('nd_username'); break; // Google Bookmarks
 			case 4 : $rssurl = get_option('nd_username'); break; // Reddit
+			case 5 : $rssurl = get_option('nd_username'); break; // Yahoo Pipes
 		}
 	}
 	else {
@@ -884,6 +885,13 @@ function neop_pstlcs_post_new($automatic = 1) {
 					$bookmark[date] = $item[dc][date];
 					$bookmark[tags] = '';
 					break;
+				case 5 : // Yahoo pipes
+					$bookmark[title] = $item[title];
+					$bookmark[link] = $item[link];
+					$bookmark[description] = $item[description];
+					$bookmark[date] = $item[pubdate];
+					$bookmark[tags] = '';
+					break;
 			}
 			
 			$ptime = strtotime($bookmark[date]);
@@ -893,7 +901,7 @@ function neop_pstlcs_post_new($automatic = 1) {
 				if($service == 0 || $service == 2) { // [SERVICE]
 					$timea = explode(':',substr($bookmark[date],11,8));
 					$datea = explode('-',substr($bookmark[date],0,10));
-					$ptime = gmmktime($timea[0],$timea[1],$timea[2],$datea[1],$datea[2],$datea[0]);
+					$ptime = mktime($timea[0],$timea[1],$timea[2],$datea[1],$datea[2],$datea[0]);
 				}
 			}
 			
@@ -956,6 +964,7 @@ function neop_pstlcs_post_new($automatic = 1) {
 						case 2 : $nd_site_tagurl = '#'; break; // Google Reader (we should never get here)
 						case 3 : $nd_site_tagurl = '#'; break; // Google Bookmarks does not have a public tag url.
 						case 4 : $nd_site_tagurl = '#'; break; // Reddit (we should never get here)
+						case 5 : $nd_site_tagurl = '#'; break; // Yahoo pipes (we should never get here)
 					}
 					$tags = explode(',',$bookmark[tags]);
 					foreach($tags as $t) {
@@ -1043,6 +1052,7 @@ function neop_pstlcs_post_new($automatic = 1) {
 				case 2 : $bdate = $item[published]; break; // Google Reader
 				case 3 : $bdate = $item[pubdate]; break; // Google Bookmarks
 				case 4 : $bdate = $item[dc][date]; break; // Reddit
+				case 5 : $bdate = $item[pubDate]; break; // Yahoo Pipes
 			}
 			$ptime = strtotime($bdate);
 			if(!$dateend) $dateend = $ptime;
@@ -1090,10 +1100,10 @@ function neop_pstlcs_push_post($numero,$postarray) {
 	
 	// Fix the dates so that the date posted is based on the timezone set in the WordPress options tab
 	$gmt_offset = (get_option('gmt_offset') * 3600) - date('Z');
-	$rdstart = $rdstart + $gmt_offset;
-	$rdend = $rdend + $gmt_offset;
+	$ldstart = $rdstart + $gmt_offset;
+	$ldend = $rdend + $gmt_offset;
 	
-	if(date('dmY',$rdstart) == date('dmY',$rdend)) { // Single day template
+	if(date('dmY',$ldstart) == date('dmY',$ldend)) { // Single day template
 		if(!($posttitle = get_option('nd_titlesingle'))) $posttitle = 'Bookmarks for %datestart% from %datestart{H:i}% to %dateend{H:i}%';
 		if(!($postbody = get_option('nd_posttsingle'))) $postbody = "<p>These are my links for %datestart% from %datestart{H:i}% to %dateend{H:i}%:</p>\n<ul>\n%bookmarks%\n</ul>";
 	} else { // Two day template
@@ -1108,8 +1118,8 @@ function neop_pstlcs_push_post($numero,$postarray) {
 		$postlinks = $newposts;
 	
 	// Replace the dates with default format.
-	$datestart = mysql2date($nd_datetemplate,date('Y-m-d H:i:s',$rdstart));
-	$dateend = mysql2date($nd_datetemplate,date('Y-m-d H:i:s',$rdend));
+	$datestart = mysql2date($nd_datetemplate,date('Y-m-d H:i:s',$ldstart));
+	$dateend = mysql2date($nd_datetemplate,date('Y-m-d H:i:s',$ldend));
 	
 	$posttitle = str_replace("%datestart%",$datestart,$posttitle);
 	$posttitle = str_replace("%dateend%",$dateend,$posttitle);
@@ -1117,10 +1127,10 @@ function neop_pstlcs_push_post($numero,$postarray) {
 	$postbody = str_replace("%dateend%",$dateend,$postbody);
 	
 	// Replace dates with custom format.
-	$posttitle = preg_replace('/%datestart\{([^\}]*)\}%/e','mysql2date(\'$1\',date(\'Y-m-d H:i:s\',$rdstart))',$posttitle);
-	$posttitle = preg_replace('/%dateend\{([^\}]*)\}%/e','mysql2date(\'$1\',date(\'Y-m-d H:i:s\',$rdend))',$posttitle);
-	$postbody = preg_replace('/%datestart\{([^\}]*)\}%/e','mysql2date(\'$1\',date(\'Y-m-d H:i:s\',$rdstart))',$postbody);
-	$postbody = preg_replace('/%dateend\{([^\}]*)\}%/e','mysql2date(\'$1\',date(\'Y-m-d H:i:s\',$rdend))',$postbody);
+	$posttitle = preg_replace('/%datestart\{([^\}]*)\}%/e','mysql2date(\'$1\',date(\'Y-m-d H:i:s\',$ldstart))',$posttitle);
+	$posttitle = preg_replace('/%dateend\{([^\}]*)\}%/e','mysql2date(\'$1\',date(\'Y-m-d H:i:s\',$ldend))',$posttitle);
+	$postbody = preg_replace('/%datestart\{([^\}]*)\}%/e','mysql2date(\'$1\',date(\'Y-m-d H:i:s\',$ldstart))',$postbody);
+	$postbody = preg_replace('/%dateend\{([^\}]*)\}%/e','mysql2date(\'$1\',date(\'Y-m-d H:i:s\',$ldend))',$postbody);
 	
 	// Create the post body
 	$postbody = str_replace("%bookmarks%",$postlinks,$postbody);
@@ -1153,7 +1163,7 @@ function neop_pstlcs_push_post($numero,$postarray) {
 	$nd_use_post_tags = get_option('nd_use_post_tags');
 	
 	if($nd_tagging_enabled == 1) {
-		//$post_tags = $wpdb->escape(get_option('nd_post_tags')); // I think we don't need to do this.
+		$post_tags = get_option('nd_post_tags');
 		$post_tags = preg_replace('/\s*,\s*/',',',$post_tags); // Remove spaces before and after commas.
 		$post_tags = trim($post_tags); // Remove spaces at the start and end of the string.
 		$post_tags = preg_replace('/,,+/',',',$post_tags); // Remove consecutive commas.
@@ -1161,7 +1171,6 @@ function neop_pstlcs_push_post($numero,$postarray) {
 		$tags = $post_tags;
 		
 		if($nd_use_post_tags == 1) {
-  	  		//$newtags = $wpdb->escape($newtags); // I think we don't need to do this.
   			if($postid != -1) $draft_tags = get_option('nd_drafttags') . "," . $newtags;
   			else $draft_tags = $newtags;
   			$draft_tags = preg_replace('/\s*,\s*/',',',$draft_tags); // Remove spaces before and after commas.
@@ -1179,8 +1188,8 @@ function neop_pstlcs_push_post($numero,$postarray) {
 		$nd_slugtemplate = str_replace("%datestart%",$datestart,$nd_slugtemplate);
 		$nd_slugtemplate = str_replace("%dateend%",$dateend,$nd_slugtemplate);
 		// Replace dates with custom format
-		$nd_slugtemplate = preg_replace('/%datestart\{([^\}]*)\}%/e','mysql2date(\'$1\',date(\'Y-m-d H:i:s\',$rdstart))',$nd_slugtemplate);
-		$nd_slugtemplate = preg_replace('/%dateend\{([^\}]*)\}%/e','mysql2date(\'$1\',date(\'Y-m-d H:i:s\',$rdend))',$nd_slugtemplate);
+		$nd_slugtemplate = preg_replace('/%datestart\{([^\}]*)\}%/e','mysql2date(\'$1\',date(\'Y-m-d H:i:s\',$ldstart))',$nd_slugtemplate);
+		$nd_slugtemplate = preg_replace('/%dateend\{([^\}]*)\}%/e','mysql2date(\'$1\',date(\'Y-m-d H:i:s\',$ldend))',$nd_slugtemplate);
 		// Replace the title if we have it
 		if($bookmarkt) {
 			if(version_compare(PHP_VERSION,'5.2.3',">=")) $nd_slugtemplate = str_replace("%title%",htmlentities($bookmarkt,ENT_QUOTES,"UTF-8",FALSE),$nd_slugtemplate);

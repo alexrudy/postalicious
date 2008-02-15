@@ -1,12 +1,12 @@
 === Postalicious ===
 Contributors: neop
 Donate link: http://neop.gbtopia.com/?p=108
-Tags: bookmarks, del.icio.us, ma.gnolia, Google Reader, Reddit
+Tags: bookmarks, del.icio.us, ma.gnolia, Google Reader, Reddit, Yahoo Pipes
 Requires at least: 2.1
 Tested up to: 2.3.2
 Stable tag: 2.0
 
-Postalicious is a WordPress plugin that automatically posts your del.icio.us, ma.gnolia, or Google Reader bookmarks to your blog.
+Postalicious is a WordPress plugin that automatically posts your del.icio.us, ma.gnolia, or Google Reader, Reddit or Yahoo Pipes bookmarks to your blog.
 
 == Description ==
 
@@ -14,7 +14,7 @@ Postalicious is a WordPress plugin that automatically posts your del.icio.us, ma
 
 == Installation ==
 
-To install Postalicious copy "wp-postalicious.php" to the "wp-content/plugins/" folder found in your WordPress installation. Then go to the "Plugins" tab inside the WordPress administration website and activate Postalicious. Additionally, if you want to use the tag related features in Postalicious with ma.gnolia or if you want to use Postalicious with Google Reader you need to installed the modified version of "rss.php" that comes with Postalicious. To do this, simply copy the "rss.php" file that comes with Postalicious to the the "wp-includes" folder in your WordPress installation, replacing the existing file. For more information about the "rss.php" file, please refer to the section titled "About the rss.php file". Finally you need to enter your account type (del.icio.us, ma.gnolia, or Google Reader) and details as well as other Postalicious preferences in the tab labeled "Postalicious" inside the "Options" tab in the WordPress administration website.
+To install Postalicious copy "wp-postalicious.php" to the "wp-content/plugins/" folder found in your WordPress installation. Then go to the "Plugins" tab inside the WordPress administration website and activate Postalicious. Additionally, if you want to use the tag related features in Postalicious with ma.gnolia or if you want to use Postalicious with Google Reader you need to installed the modified version of "rss.php" that comes with Postalicious. To do this, simply copy the "rss.php" file that comes with Postalicious to the the "wp-includes" folder in your WordPress installation, replacing the existing file. For more information about the "rss.php" file, please refer to the section titled "About the rss.php file". Finally you need to enter your account type (del.icio.us, ma.gnolia, or Google Reader, Reddit or Yahoo Pipes) and details as well as other Postalicious preferences in the tab labeled "Postalicious" inside the "Options" tab in the WordPress administration website.
 
 == Frequently Asked Questions ==
 
@@ -55,7 +55,7 @@ You need to install the modified version of rss.php bundled with Postalicious to
 
 = Why are tag-related features disabled? =
 
-If you are using ma.gnolia, then you need to install the modifed version of rss.php bundled with Postalicious to enable tag-related features. For information on how to install it, please refer to the "Installation" section. For more information about why a modified version of rss.php is needed, please read the secion titled "About the rss.php file".
+If you are using Google Reader, Reddit, or Yahoo Pipes then tags are not supported because the RSS feeds for these services do not include a list of tags. If you are using ma.gnolia, then you need to install the modifed version of rss.php bundled with Postalicious to enable tag-related features. For information on how to install it, please refer to the "Installation" section. For more information about why a modified version of rss.php is needed, please read the secion titled "About the rss.php file".
 
 If you are using Google Reader, then tag-related features are unavailable since the bookmark's tags are not published in the RSS feed provided by Google Reader.
 
@@ -66,6 +66,7 @@ Postalicious is very easy to use. You only need to set up your preferences and t
 == Features ==
 
 * Automatically create posts in your blog with your bookmarks that allows you to keep your blog updated by just bookmarking your favorite websites!
+* Works with del.icio.us, ma.gnolia, Google Reader, Reddit and Yahoo Pipes.
 * Complete control over how often your bookmarks are posted and how many bookmarks should appear on each post.
 * If the post is not ready for prime time, Postalicious creates a draft with the pending bookmarks which you can publish any time or wait for Postalicious to publish it when it meets your publishing settings.
 * Full customization on the look of posts created by Postalicious, including templates for the post slug, post title, and post body.
@@ -75,6 +76,8 @@ Postalicious is very easy to use. You only need to set up your preferences and t
 * Logs all the activity so that you know what Postalicious did and when.
 
 == Version History ==
+
+= Version 2.0rc3 =* Added Yahoo Pipes support.* Fixed a bug where the options page did not show up in some WordPress installations.* Fixed a bug where the tags for all posts were ignored.</li>* Fixed a bug where some bookmarks could keep getting posted repeatedly or be skipped.
 
 = Version 2.0rc2 =
 
