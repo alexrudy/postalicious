@@ -77,6 +77,11 @@ Postalicious is very easy to use. You only need to set up your preferences and t
 
 == Version History ==
 
+= Version 2.0rc4 =
+
+* Fixed another double posting bug when certain combination of settings was being used.
+* Removed the "Enable Tags" option since it didn't really make much sense since WordPress added native tag support.
+
 = Version 2.0rc3 =* Added Yahoo Pipes support.* Fixed a bug where the options page did not show up in some WordPress installations.* Fixed a bug where the tags for all posts were ignored.</li>* Fixed a bug where some bookmarks could keep getting posted repeatedly or be skipped.
 
 = Version 2.0rc2 =

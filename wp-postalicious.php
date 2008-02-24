@@ -3,7 +3,7 @@
 Plugin Name: Postalicious
 Plugin URI: http://neop.gbtopia.com/?p=108
 Description: Automatically create posts with your del.icio.us bookmarks.
-Version: 2.0rc3
+Version: 2.0rc4
 Author: Pablo Gomez
 Author URI: http://neop.gbtopia.com
 */
@@ -164,8 +164,6 @@ function neop_pstlcs_options() {
 		update_option('nd_posttsingle',stripslashes($_POST['nd_posttsingle']));
 		update_option('nd_posttdouble',stripslashes($_POST['nd_posttdouble']));
 		
-		if($_POST['nd_tagging_enabled']) update_option('nd_tagging_enabled',1);
-		else update_option('nd_tagging_enabled',0);
 		if($_POST['nd_use_post_tags']) update_option('nd_use_post_tags',1);
 		else update_option('nd_use_post_tags',0);
 		if(isset($_POST['nd_post_tags'])) update_option('nd_post_tags',stripslashes($_POST['nd_post_tags']));
@@ -207,7 +205,6 @@ function neop_pstlcs_options() {
 	if(!($nd_posttsingle = get_option('nd_posttsingle'))) $nd_posttsingle = "<p>These are my links for %datestart% from %datestart{H:i}% to %dateend{H:i}%:</p>\n<ul>\n%bookmarks%\n</ul>";
 	if(!($nd_posttdouble = get_option('nd_posttdouble'))) $nd_posttdouble = "<p>These are my links for %datestart% through %dateend%:</p>\n<ul>\n%bookmarks%\n</ul>";
 	
-	if(!($nd_tagging_enabled = get_option('nd_tagging_enabled'))) $nd_tagging_enabled = 0;
 	if(!($nd_use_post_tags = get_option('nd_use_post_tags'))) $nd_use_post_tags = 0;
 	if(!($nd_post_tags = get_option('nd_post_tags'))) $nd_post_tags = '';
 	
@@ -554,13 +551,6 @@ function neop_pstlcs_options() {
 				<legend>Simple Tagging Plugin Integration</legend>
 			<?php } ?>
 				<table width="100%" cellspacing="2" cellpadding="5" class="optiontable editform"> 
-				<tr valign="top">
-				<th>Enabled:</th>
-				<td>
-				<label><input name="nd_tagging_enabled" type="checkbox" id="nd_tagging_enabled" <?php if($nd_tagging_enabled == 1) echo 'checked="checked"' ?> />
-				Use tags for new posts.</label>
-				</td>
-				</tr>
 				<tr valign="top"> 
 				<th <?php if($tagsdisabled > 0) echo 'style="color:#999;"'; ?> id="nd_use_post_tags_head">bookmark's tags:</th> 
 				<td>
@@ -651,7 +641,7 @@ endif;
 
 if (!function_exists('neop_pstlcs_update')) :
 function neop_pstlcs_update() {
-	if(!($nd_version = get_option('nd_version'))) $nd_version = 200; // Because of a bug in 121, get_option('nd_version') will always be at least 150
+	if(!($nd_version = get_option('nd_version'))) $nd_version = 201; // Because of a bug in 121, get_option('nd_version') will always be at least 150
 	if($nd_version < 121) {
 		if(get_option('nd_utw_enabled') == 'yes') {
 			update_option('nd_tagging_enabled','yes');
@@ -689,10 +679,6 @@ function neop_pstlcs_update() {
 		$nd_use_del_tags = get_option('nd_use_del_tags');
 		if($nd_use_del_tags == 'yes') update_option('nd_use_post_tags',1);
 		else update_option('nd_use_post_tags',0);
-		// Change nd_tagging_enabled to use 'yes' and 'no' to use 0 and 1
-		$nd_tagging_enabled = get_option('nd_tagging_enabled');
-		if($nd_tagging_enabled == 'yes') update_option('nd_tagging_enabled',1);
-		else update_option('nd_tagging_enabled',0);
 		// Update the templates to use %date% to %datestart% in single title and single body templates.
 		$nd_titlesingle = get_option('nd_titlesingle');
 		$nd_titlesingle = str_replace('%date%','%datestart%',$nd_titlesingle);
@@ -708,6 +694,15 @@ function neop_pstlcs_update() {
 		// Add nd_draftdate2 option (this is not really the correct behavior, but it's close enough)
 		update_option('nd_draftdate2',get_option('nd_lastupdate'));
 		$nd_version = 200;
+	}
+	if($nd_version < 201) {
+		$nd_tagging_enabled = get_option('nd_tagging_enabled');
+		if($nd_tagging_enabled == 0) {
+			update_option('nd_post_tags','');
+			update_option('nd_use_post_tags',0);
+		}
+		delete_option('nd_tagging_enabled');
+		$nd_version - 201;
 	}
 	update_option('nd_version',$nd_version);
 }
@@ -812,7 +807,6 @@ function neop_pstlcs_post_new($automatic = 1) {
 		$newtags = '';
 		$totalcount = 0;
 		$filteredcount = 0;
-		$nd_tagging_enabled = get_option('nd_tagging_enabled');
 		$nd_use_post_tags = get_option('nd_use_post_tags');
 		
 		// Prepare the arrays allow html tags.
@@ -908,6 +902,9 @@ function neop_pstlcs_post_new($automatic = 1) {
 			$filtered = 0;
 			if($ptime > $lastupdate) { // If check posts newer than the last update time.
 				$totalcount++;
+				// Set the time of the newest post Postalicious has processed
+				if(!$newlastupdate) $newlastupdate = $ptime;
+				else if($ptime > $newlastupdate) $newlastupdate = $ptime;
 				$ftags = explode(',',$bookmark[tags]);
 				if($nd_whitelist == ',,') $filtered = 1;
 				else {
@@ -926,6 +923,7 @@ function neop_pstlcs_post_new($automatic = 1) {
 					}
 				}
 			}
+			
 			if($filtered == 1) {
 				$filteredcount++;
 				// Sets $dateend and $datestart to the newest and oldest dates that will be included in the post.
@@ -978,7 +976,7 @@ function neop_pstlcs_post_new($automatic = 1) {
 						}
 						$tag .= $currenttag . ' ';
 					}
-					if($nd_tagging_enabled == 1 && $nd_use_post_tags == 1) {
+					if($nd_use_post_tags == 1) {
 						if($newtags == '') $newtags .= $bookmark[tags];
 						else $newtags .= ',' . $bookmark[tags];
 					}
@@ -1039,7 +1037,7 @@ function neop_pstlcs_post_new($automatic = 1) {
 		
 		$lastrun = time();		
 		update_option('nd_lastrun',$lastrun);
-		if($dateend) update_option('nd_lastupdate',$dateend);
+		if($newlastupdate) update_option('nd_lastupdate',$newlastupdate);
 		update_option('nd_updating',0);
 		neop_pstlcs_log($message,$lastrun);
 		return $message;
@@ -1158,25 +1156,26 @@ function neop_pstlcs_push_post($numero,$postarray) {
 	
 	$categoryarray = explode(',',$nd_catforposts);
 	if(!($nd_poststatus = get_option('nd_poststatus'))) $nd_poststatus = 'publish';
-	
-	$nd_tagging_enabled = get_option('nd_tagging_enabled');
+
 	$nd_use_post_tags = get_option('nd_use_post_tags');
+	$nd_post_tags = get_option('nd_post_tags');
+	$post_tags = $nd_post_tags;
 	
-	if($nd_tagging_enabled == 1) {
-		$post_tags = get_option('nd_post_tags');
-		$post_tags = preg_replace('/\s*,\s*/',',',$post_tags); // Remove spaces before and after commas.
-		$post_tags = trim($post_tags); // Remove spaces at the start and end of the string.
-		$post_tags = preg_replace('/,,+/',',',$post_tags); // Remove consecutive commas.
-		$post_tags = explode(',',$post_tags);
-		$tags = $post_tags;
-		
+	if($nd_use_post_tags == 1 || $post_tags) {
+		if($post_tags) {
+			$post_tags = preg_replace('/\s*,\s*/',',',$post_tags); // Remove spaces before and after commas.
+			$post_tags = trim($post_tags); // Remove spaces at the start and end of the string.
+			$post_tags = preg_replace('/,,+/',',',$post_tags); // Remove consecutive commas.
+			$post_tags = explode(',',$post_tags);
+			$tags = $post_tags;
+		}
 		if($nd_use_post_tags == 1) {
   			if($postid != -1) $draft_tags = get_option('nd_drafttags') . "," . $newtags;
   			else $draft_tags = $newtags;
   			$draft_tags = preg_replace('/\s*,\s*/',',',$draft_tags); // Remove spaces before and after commas.
   			$draft_tags = trim($draft_tags); // Remove spaces at the start and end of the string.
   			$draft_tags = preg_replace('/,,+/',',',$draft_tags); // Remove consecutive commas.
-  			$tags = array_merge(explode(',',$draft_tags) ,$post_tags);
+  			$tags = array_merge(explode(',',$draft_tags) ,(array)$post_tags);
 		}
 		$tags = array_flip(array_flip($tags)); // Remove duplicates
 	}
@@ -1264,20 +1263,20 @@ function neop_pstlcs_push_post($numero,$postarray) {
 		update_option('nd_lastdraftid',-1);
 		update_option('nd_draftdate','');
 		update_option('nd_draftdate2','');
-		if($nd_tagging_enabled == 1) update_option('nd_drafttags','');
+		if($nd_use_post_tags == 1 || $nd_post_tags) update_option('nd_drafttags','');
 		update_option('nd_lastpostdate',time());
 	} else if(!$nothingnew) { // Created or edited a draft. (Only change the options if there's something new)
 		update_option('nd_draftcontent',$postlinks);
 		update_option('nd_unpublishedcount',$count);	
 		update_option('nd_draftdate',$rdstart);
 		update_option('nd_draftdate2',$rdend);
-		if($nd_tagging_enabled == 1) update_option('nd_drafttags',$draft_tags);
+		if($nd_use_post_tags == 1 || $nd_post_tags) update_option('nd_drafttags',$draft_tags);
 		if($postid == -1) update_option('nd_lastdraftid',$newid); // New draft.
 	}
 	
 	// Set up the tags for the post, if there's nothing new, only do it if the post will be published.
 	// We can probably just set the tags every time, but let's be safe.
-	if($nd_tagging_enabled == 1 && !empty($tags) && (!$nothingnew || $primetime)) {
+	if(($nd_use_post_tags == 1 || $nd_post_tags) && !empty($tags) && (!$nothingnew || $primetime)) {
 		if($wp_db_version >= 6124) {
 			wp_set_post_tags($newid, implode(',',$tags),true);
 		}
