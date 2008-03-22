@@ -3,7 +3,7 @@
 Plugin Name: Postalicious
 Plugin URI: http://neop.gbtopia.com/?p=108
 Description: Automatically create posts with your del.icio.us bookmarks.
-Version: 2.0rc4
+Version: 2.0rc5
 Author: Pablo Gomez
 Author URI: http://neop.gbtopia.com
 */
@@ -713,7 +713,7 @@ function neop_pstlcs_post_new($automatic = 1) {
 	require_once (ABSPATH . WPINC . '/rss.php');
 	global $wpdb, $wp_db_version, $utw, $STagging;
 	$nd_updating = get_option('nd_updating');
-	if($nd_updating) {
+	if($nd_updating && get_option('nd_lastrun') + 300 > time()) {
 		$lastrun = time();
 		update_option('nd_lastrun',$lastrun);
 		neop_pstlcs_log('Update Failed. Potalicious is already updating at the moment.',$lastrun);
@@ -887,6 +887,13 @@ function neop_pstlcs_post_new($automatic = 1) {
 					$bookmark[tags] = '';
 					break;
 			}
+			
+			// Code to fix encoding in certain PHP installations.
+			/*
+			$bookmark[title] = utf8_encode($bookmark[title]);
+			$bookmark[description] = utf8_encode($bookmark[description]);
+			$bookmark[tags] = utf8_encode($bookmark[tags]);
+			*/
 			
 			$ptime = strtotime($bookmark[date]);
 			
@@ -1356,6 +1363,15 @@ function neop_pstlcs_log($string,$time) {
 }
 endif;
 
+// Add strripos if PHP4 is being used.
+if (function_exists('strripos') == false) :
+function strripos($haystack, $needle) {
+	$pos = strlen($haystack) - strpos(strrev($haystack), strrev($needle));
+	if ($pos == strlen($haystack)) { $pos = 0; }
+	return $pos;
+}
+endif;
+
 if (!function_exists('neop_pstlcs_user_deleted')) :
 function neop_pstlcs_user_deleted($deletedid) {
 	if(!($nd_idforposts = get_option('nd_idforposts'))) $nd_idforposts = 1;
@@ -1388,6 +1404,7 @@ if (!function_exists('neop_deactivate_del')) :
 function neop_deactivate_del() {
 	wp_clear_scheduled_hook('nd_hourly_update');
 	update_option('nd_hourlyupdates',0);
+	update_option('nd_updating',0);
 }
 endif;
 
