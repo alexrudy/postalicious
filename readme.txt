@@ -77,6 +77,11 @@ Postalicious is very easy to use. You only need to set up your preferences and t
 
 == Version History ==
 
+= Version 2.0rc5 =
+
+* Added some safeguards to prevent the "Potalicious is already updating at the moment." message after there was a PHP error in the last update.
+* Fixed some more problems in PHP4 installations.
+
 = Version 2.0rc4 =
 
 * Fixed another double posting bug when certain combination of settings was being used.
