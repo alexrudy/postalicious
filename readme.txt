@@ -81,6 +81,7 @@ Postalicious is very easy to use. You only need to set up your preferences and t
 
 * Added some safeguards to prevent the "Potalicious is already updating at the moment." message after there was a PHP error in the last update.
 * Fixed some more problems in PHP4 installations.
+* Fixed a typo in the code which made the "bookmark's tags" option not work.
 
 = Version 2.0rc4 =
 

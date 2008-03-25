@@ -702,7 +702,7 @@ function neop_pstlcs_update() {
 			update_option('nd_use_post_tags',0);
 		}
 		delete_option('nd_tagging_enabled');
-		$nd_version - 201;
+		$nd_version = 201;
 	}
 	update_option('nd_version',$nd_version);
 }
