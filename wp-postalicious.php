@@ -2,8 +2,8 @@
 /*
 Plugin Name: Postalicious
 Plugin URI: http://neop.gbtopia.com/?p=108
-Description: Automatically create posts with your del.icio.us bookmarks.
-Version: 2.0rc5
+Description: Automatically create posts with your delicious bookmarks.
+Version: 2.0rc6
 Author: Pablo Gomez
 Author URI: http://neop.gbtopia.com
 */
@@ -43,7 +43,7 @@ function neop_pstlcs_options() {
 			if(!($service = get_option('nd_service'))) $service = 0;
 			if($username) {
 				switch($service) { // [SERVICE]
-					case 0 : $rssurl = "http://del.icio.us/rss/$username"; break; // del.icio.us
+					case 0 : $rssurl = "http://feeds.delicious.com/v2/rss/$username"; break; // delicious
 					case 1 : $rssurl = "http://ma.gnolia.com/rss/lite/people/$username"; break; // ma.gnolia
 					case 2 : $rssurl = get_option('nd_username'); break; // Google Reader
 					case 3 : $rssurl = get_option('nd_username'); break; // Google Bookmarks
@@ -227,7 +227,7 @@ function neop_pstlcs_options() {
 	
 	// [SERVICE]
 	$tagsdisabled = 0;
-	if(MAGPIE_MOD_VERSION != 'neop' && $nd_service == 1) $tagsdisabled = 2;
+	if(MAGPIE_MOD_VERSION != 'neop' && ($nd_service == 1 || $nd_service == 0)) $tagsdisabled = 2;
 	else if($nd_service == 2 || $nd_service == 4 || $nd_service == 5) $tagsdisabled = 1;
 	$urlservice = 0;
 	if($nd_service >= 2) $urlservice = 1;
@@ -270,7 +270,7 @@ function neop_pstlcs_options() {
 			nd_status = function (type,service) { // We only use this inside nd_toggle, so no need for a global function.
 				switch(type) {
 					case 'tags' :
-						if(!nd_magpieupdated && service == 1) return 2;
+						if(!nd_magpieupdated && (service == 1 || service == 0)) return 2;
 						else if(service == 2 || service == 4 || service == 5) return 1;
 						else return 0;
 						break;
@@ -408,7 +408,7 @@ function neop_pstlcs_options() {
 				<th scope="row">Account type:</th>
 				<td>
 				<label><input id="nd_service_0" name="nd_service" type="radio" value="0" <?php if($nd_service == 0) echo 'checked="checked"' ?> onchange="nd_servicechanged();" />
-				del.icio.us</label><br />
+				delicious</label><br />
 				<label><input id="nd_service_1" name="nd_service" type="radio" value="1" <?php if($nd_service == 1) echo 'checked="checked"' ?> onchange="nd_servicechanged();" />
 				ma.gnolia</label><br />
 				<label><input id="nd_service_2" name="nd_service" <?php if(MAGPIE_MOD_VERSION != 'neop') echo "disabled='disabled' " ?>type="radio" value="2" <?php if($nd_service == 2) echo 'checked="checked"' ?> onchange="nd_servicechanged();" />
@@ -723,13 +723,13 @@ function neop_pstlcs_post_new($automatic = 1) {
 	
 	neop_pstlcs_update(); // Check if Postalicious has been udpated since last run.
 	
-	// Build URL for del.icio.us RSS feed or exit if username has not been set.
+	// Build URL for delicious RSS feed or exit if username has not been set.
 	$username = urlencode(get_option('nd_username'));
 
 	if(!($service = get_option('nd_service'))) $service = 0;
 	if($username) { // [SERVICE]
 		switch($service) {
-			case 0 : $rssurl = "http://del.icio.us/rss/$username"; break; // del.icio.us
+			case 0 : $rssurl = "http://feeds.delicious.com/v2/rss/$username"; break; // delicious
 			case 1 : $rssurl = "http://ma.gnolia.com/rss/lite/people/$username"; break; // ma.gnolia
 			case 2 : $rssurl = get_option('nd_username'); break; // Google Reader
 			case 3 : $rssurl = get_option('nd_username'); break; // Google Bookmarks
@@ -830,14 +830,19 @@ function neop_pstlcs_post_new($automatic = 1) {
 		foreach(array_reverse($feed->items) as $item) {
 			// Consolidate the info from the feed in a single array so that we can use that instead of the service specific ones.
 			switch($service) { // [SERVICE]
-				case 0: // del.icio.us
+				case 0: // delicious
 					$bookmark[title] = $item[title];
 					$bookmark[link] = $item[link];
 					$bookmark[description] = $item[description];
-					$bookmark[date] = $item[dc][date];
-					$bookmark[tags] = $item[dc][subject];
-					// The tags should be comma seprated.
-					$bookmark[tags] = str_replace(' ',',',$bookmark[tags]);
+					$bookmark[date] = $item[pubdate];
+					
+					if(MAGPIE_MOD_VERSION == 'neop') {
+						if(isset($item[mgpn_category_array])) $bookmark[tags] = implode(',', $item[mgpn_category_array]);
+						else $bookmark[tags] = $item[category];
+					}
+					else
+						$bookmark[tags] = '';
+					
 					break;
 				case 1: // ma.gnolia
 					$bookmark[title] = $item[title];
@@ -899,7 +904,8 @@ function neop_pstlcs_post_new($automatic = 1) {
 			
 			// strtotime seems to have some problems with certain dates in some PHP installations, so let's have some fallback code
 			if($ptime == -1 || $ptime === false) {
-				if($service == 0 || $service == 2) { // [SERVICE]
+				if($service == 2) { // [SERVICE]
+					// Note: removed service 0 since delicious 2.0 changed the date format, so this will no longer work.
 					$timea = explode(':',substr($bookmark[date],11,8));
 					$datea = explode('-',substr($bookmark[date],0,10));
 					$ptime = mktime($timea[0],$timea[1],$timea[2],$datea[1],$datea[2],$datea[0]);
@@ -964,7 +970,7 @@ function neop_pstlcs_post_new($automatic = 1) {
 				$tag = '';
 				if($bookmark[tags] != '') {
 					switch($service) { // [SERVICE]
-						case 0 : $nd_site_tagurl = 'http://del.icio.us/'.urlencode($username).'/'; break; //del.icio.us
+						case 0 : $nd_site_tagurl = 'http://delicious.com/'.urlencode($username).'/'; break; //delicious
 						case 1 : $nd_site_tagurl = 'http://ma.gnolia.com/people/'.urlencode($username).'/tags/'; break; // ma.gnolia
 						case 2 : $nd_site_tagurl = '#'; break; // Google Reader (we should never get here)
 						case 3 : $nd_site_tagurl = '#'; break; // Google Bookmarks does not have a public tag url.
@@ -1052,7 +1058,7 @@ function neop_pstlcs_post_new($automatic = 1) {
 	} else { // if lastupdate
 		foreach($feed->items as $item) {
 			switch($service) { // [SERVICE]
-				case 0 : $bdate = $item[dc][date]; break; // del.icio.us
+				case 0 : $bdate = $item[pubdate]; break; // delicious
 				case 1 : $bdate = $item[pubdate]; break; // ma.gnolia
 				case 2 : $bdate = $item[published]; break; // Google Reader
 				case 3 : $bdate = $item[pubdate]; break; // Google Bookmarks

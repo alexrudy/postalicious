@@ -1,26 +1,26 @@
 === Postalicious ===
 Contributors: neop
 Donate link: http://neop.gbtopia.com/?p=108
-Tags: bookmarks, del.icio.us, ma.gnolia, Google Reader, Reddit, Yahoo Pipes
+Tags: bookmarks, delicious, ma.gnolia, Google Reader, Reddit, Yahoo Pipes
 Requires at least: 2.1
 Tested up to: 2.3.2
 Stable tag: 2.0
 
-Postalicious is a WordPress plugin that automatically posts your del.icio.us, ma.gnolia, or Google Reader, Reddit or Yahoo Pipes bookmarks to your blog.
+Postalicious is a WordPress plugin that automatically posts your delicious, ma.gnolia, or Google Reader, Reddit or Yahoo Pipes bookmarks to your blog.
 
 == Description ==
 
-Postalicious is a WordPress plugin that automatically posts your del.icio.us, ma.gnolia, or Google Reader bookmarks to your blog. The exact details of how your bookmarks are posted is very customizable and is designed to meet your specific needs. Postalicious uses the psuedo-cron functionality introduced in WordPress 2.1 to schedule automatic hourly updates. If you do not have WordPress 2.1 or later installed, you will still be able to use Postalicious, but you will have to perform the updates manually.
+Postalicious is a WordPress plugin that automatically posts your delicious, ma.gnolia, or Google Reader bookmarks to your blog. The exact details of how your bookmarks are posted is very customizable and is designed to meet your specific needs. Postalicious uses the psuedo-cron functionality introduced in WordPress 2.1 to schedule automatic hourly updates. If you do not have WordPress 2.1 or later installed, you will still be able to use Postalicious, but you will have to perform the updates manually.
 
 == Installation ==
 
-To install Postalicious copy "wp-postalicious.php" to the "wp-content/plugins/" folder found in your WordPress installation. Then go to the "Plugins" tab inside the WordPress administration website and activate Postalicious. Additionally, if you want to use the tag related features in Postalicious with ma.gnolia or if you want to use Postalicious with Google Reader you need to installed the modified version of "rss.php" that comes with Postalicious. To do this, simply copy the "rss.php" file that comes with Postalicious to the the "wp-includes" folder in your WordPress installation, replacing the existing file. For more information about the "rss.php" file, please refer to the section titled "About the rss.php file". Finally you need to enter your account type (del.icio.us, ma.gnolia, or Google Reader, Reddit or Yahoo Pipes) and details as well as other Postalicious preferences in the tab labeled "Postalicious" inside the "Options" tab in the WordPress administration website.
+To install Postalicious copy "wp-postalicious.php" to the "wp-content/plugins/" folder found in your WordPress installation. Then go to the "Plugins" tab inside the WordPress administration website and activate Postalicious. Additionally, if you want to use the tag related features in Postalicious with ma.gnolia or if you want to use Postalicious with Google Reader you need to installed the modified version of "rss.php" that comes with Postalicious. To do this, simply copy the "rss.php" file that comes with Postalicious to the the "wp-includes" folder in your WordPress installation, replacing the existing file. For more information about the "rss.php" file, please refer to the section titled "About the rss.php file". Finally you need to enter your account type (delicious, ma.gnolia, or Google Reader, Reddit or Yahoo Pipes) and details as well as other Postalicious preferences in the tab labeled "Postalicious" inside the "Options" tab in the WordPress administration website.
 
 == Frequently Asked Questions ==
 
 = I just added some bookmarks but Postalicious is not picking them up right away, what's wrong? =
 
-Postalicious 2.0 uses the MagpieRSS version included with WordPress. One of the features of MagpieRSS is that it caches the feeds it retrieves so that they can be used often without having to download the feed every time. By default, the cache created by MagpieRSS lasts one hour, which means that any new bookmarks added within one hour of the last update will not be picked up until the cache expires one hour later. Additionally, some services, such as del.icio.us, don't immediately update the rss feeds for the user's bookmarks which may also cause a delay between the time you post the bookmarks and the time when Postalicious is able to grab them.
+Postalicious 2.0 uses the MagpieRSS version included with WordPress. One of the features of MagpieRSS is that it caches the feeds it retrieves so that they can be used often without having to download the feed every time. By default, the cache created by MagpieRSS lasts one hour, which means that any new bookmarks added within one hour of the last update will not be picked up until the cache expires one hour later. Additionally, some services, such as delicious, don't immediately update the rss feeds for the user's bookmarks which may also cause a delay between the time you post the bookmarks and the time when Postalicious is able to grab them.
 
 = Which time zone does Postalicious use?  =
 
@@ -66,16 +66,20 @@ Postalicious is very easy to use. You only need to set up your preferences and t
 == Features ==
 
 * Automatically create posts in your blog with your bookmarks that allows you to keep your blog updated by just bookmarking your favorite websites!
-* Works with del.icio.us, ma.gnolia, Google Reader, Reddit and Yahoo Pipes.
+* Works with delicious, ma.gnolia, Google Reader, Reddit and Yahoo Pipes.
 * Complete control over how often your bookmarks are posted and how many bookmarks should appear on each post.
 * If the post is not ready for prime time, Postalicious creates a draft with the pending bookmarks which you can publish any time or wait for Postalicious to publish it when it meets your publishing settings.
 * Full customization on the look of posts created by Postalicious, including templates for the post slug, post title, and post body.
 * Integrates with WordPress 2.3 tags, or with Ultimate Tag Warrior and Simple Tagging plugins in earlier version of WordPress.
-* Support for del.icio.us, ma.gnolia and Google Reader.
+* Support for delicious, ma.gnolia and Google Reader.
 * Filter the bookmarks that are posted to your blog depending on how you tagged them.
 * Logs all the activity so that you know what Postalicious did and when.
 
 == Version History ==
+
+= Version 2.0rc6 =
+
+* Postalicious now works with delicious 2.0 (aka. delicious.com).
 
 = Version 2.0rc5 =
 
@@ -98,7 +102,7 @@ Postalicious is very easy to use. You only need to set up your preferences and t
 
 * Added native support for ma.gnolia and support for Google Reader feeds.
 * Postalicious now comes with a modified version of rss.php which is required for Google Reader support and tag support in ma.gnolia.
-* RSS feeds are now used instead of the del.icio.us and ma.gnolia APIs.
+* RSS feeds are now used instead of the delicious and ma.gnolia APIs.
 * Private bookmark posting is now no longer possible because of the switch to RSS feeds.
 * Automatic updates are now done every hour instead of every day.
 * Added support for custom date formats in all templates.
@@ -133,7 +137,7 @@ Postalicious is very easy to use. You only need to set up your preferences and t
 = Version 1.3 =
 
 * Added support for Simple Tagging plugin. (Thanks Jonas!)
-* Added new tag template to customize the way tags are displayed (supports linking the tags page in your del.icio.us). (Thanks Jonas!)
+* Added new tag template to customize the way tags are displayed (supports linking the tags page in your delicious). (Thanks Jonas!)
 * Added the ability to only post bookmarks with certain tags.
 
 = Version 1.21 =
@@ -176,16 +180,16 @@ Postalicious is very easy to use. You only need to set up your preferences and t
 = Version 1.05 =
 
 * Fixed a bug where automatic updates did not work.
-* Fixed a bug where del.icio.us usernames/passwords containing certain characters did not work with Postalicious.
+* Fixed a bug where delicious usernames/passwords containing certain characters did not work with Postalicious.
 * Added CURL support to fix the problems some hosts have with file_get_contents.
 
 == About the rss.php file ==
 
-Postalicious 2.0 uses the MagpieRSS version bundled with WordPress to fetch the RSS feeds for del.icio.us, ma.gnolia and Google Reader. Unfortunately, the original way in which MagpieRSS handles more than one child elements with the same name in the same item on the feed does not allow Postalicious to work properly with ma.gnolia and Google Reader feeds. In the case of ma.gnolia, the tags for the bookmark can not be retrieved, in the case of Google Reader, the bookmark's title and description can not be retrieved. So if you want to use these features with Postalicious you must install the modified rss.php file which comes with Postalicious. Postalicious will automatically detect if the modified version is installed or not, and if it isn't Google Reader and tag-related support in ma.gnolia will be disabled. The modified version is backwards compatible with the unmodified version so any other plugins that use MagpieRSS should be unaffected. I am aware that there are other plugins which use their own modified versions of rss.php file, if you have already installed a modified version of rss.php and want to use Postalicious, please feel free to contact me and I'll see what can I do to help you. For instructions on how to install the rss.php file, please read the "Installation" section.
+Postalicious 2.0 uses the MagpieRSS version bundled with WordPress to fetch the RSS feeds for delicious, ma.gnolia and Google Reader. Unfortunately, the original way in which MagpieRSS handles more than one child elements with the same name in the same item on the feed does not allow Postalicious to work properly with delicious, ma.gnolia and Google Reader feeds. In the cases of delicious and  ma.gnolia, the tags for the bookmark can not be retrieved, in the case of Google Reader, the bookmark's title and description can not be retrieved. So if you want to use these features with Postalicious you must install the modified rss.php file which comes with Postalicious. Postalicious will automatically detect if the modified version is installed or not, and if it isn't Google Reader and tag-related support in delicious and ma.gnolia will be disabled. The modified version is backwards compatible with the unmodified version so any other plugins that use MagpieRSS should be unaffected. I am aware that there are other plugins which use their own modified versions of rss.php file, if you have already installed a modified version of rss.php and want to use Postalicious, please feel free to contact me and I'll see what can I do to help you. For instructions on how to install the rss.php file, please read the "Installation" section.
 
 Important Note: Updating WordPress to a newer version will remove the modified version of rss.php so if you wish to continue using Postalicious you will have to re-install it. The version of Postalicious that can be found on my website will always contain an updated version of rss.php which works with both Postalicious and the latest WordPress version. The current modified version of rss.php is based on the rss.php file found in WordPress 2.3.2, but since the rss.php file has remained relatively unchanged in the last few versions of WordPress, then there should be no problem if you replace this file in an older version of WordPress.
 
-There's also some debate about MagpieRSS support vs SimplePie for future version of WordPress, and it might be better to bundle RSS-handling functions with Postalicious instead of changing a core WordPress file, but most people use Postalicious with del.icio.us, so this shouldn't be much of a problem for now. Future version of Postalicious might take a different approach to solving this problem though.
+There's also some debate about MagpieRSS support vs SimplePie for future version of WordPress, and it might be better to bundle RSS-handling functions with Postalicious instead of changing a core WordPress file, but most people use Postalicious with delicious, so this shouldn't be much of a problem for now. Future version of Postalicious might take a different approach to solving this problem though.
 
 == Custom date formats ==
 
