@@ -80,6 +80,7 @@ Postalicious is very easy to use. You only need to set up your preferences and t
 = Version 2.0rc6 =
 
 * Postalicious now works with delicious 2.0 (aka. delicious.com).
+* Updated rss.php file to be based on WordPress 2.6 modified file.
 
 = Version 2.0rc5 =
 
