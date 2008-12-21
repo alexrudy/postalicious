@@ -67,6 +67,7 @@ Postalicious is very easy to use. You only need to set up your preferences and t
 == Version History ==
 
 = Version 2.5rc1 =
+
 * Got rid of the rss.php file, updating it every time a new version of WordPress was released was not very user-friendly.
 * Postalicious now uses SimplePie to handle RSS feeds.
 * Updated the settings page interface to match the new interface of Settings in the latest versions of WordPress.
