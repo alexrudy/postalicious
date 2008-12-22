@@ -14,9 +14,13 @@ Postalicious is a WordPress plugin that automatically posts your delicious, ma.g
 
 == Installation ==
 
-To install Postalicious copy the "wp-postalicious" folder to the "wp-content/plugins/" folder found in your WordPress installation. Then go to the "Plugins" tab inside the WordPress administration website and activate Postalicious. Finally you need to enter your account type (delicious, ma.gnolia, Google Reader, Reddit or Yahoo Pipes) and details as well as other Postalicious preferences in the by clicking the link labeled "Postalicious" inside the "Settings" menu on the navigation bar in the WordPress administration website.
+Postalicious uses the SimplePie Core plugin (which can be found at http://wordpress.org/extend/plugins/simplepie-core/), so before installing Postalicious you should first install and activate the SimplePie Core pluign. Once SimplePie Core is installed, simply copy "wp-postalicious.php" to the "wp-content/plugins/" folder found in your WordPress installation. Then go to the "Plugins" tab inside the WordPress administration website and activate Postalicious. Finally you need to enter your account type (delicious, ma.gnolia, Google Reader, Reddit or Yahoo Pipes) and details as well as other Postalicious preferences in the by clicking the link labeled "Postalicious" inside the "Settings" menu on the navigation bar in the WordPress administration website.
 
 == Frequently Asked Questions ==
+
+= What's all this about SimplePie Core?  =
+
+SimplePie is a PHP library that parses RSS feeds. There are several WordPress plugins that use SimplePie so to avoid conflicts caused by having multiple versions of SimplePie installed, the guys that make SimplePie decided to make their own WordPress plugin which only loads the SimplePie plugin so that any other plugin can use SimplePie without causing conflicts with other plugins. You can get SimplePie plugin here: http://wordpress.org/extend/plugins/simplepie-core/
 
 = Which time zone does Postalicious use?  =
 
