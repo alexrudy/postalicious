@@ -3,7 +3,7 @@
 Plugin Name: Postalicious
 Plugin URI: http://neop.gbtopia.com/?p=108
 Description: Automatically create posts with your delicious bookmarks.
-Version: 2.5rc2
+Version: 2.5rc3
 Author: Pablo Gomez
 Author URI: http://neop.gbtopia.com
 */
@@ -821,7 +821,7 @@ function neop_pstlcs_post_new($automatic = 1) {
 					$bookmark[title] = $item->get_title();
 					$bookmark[link] = $item->get_link();
 					$bookmark[description] = $item->get_description();
-					$bookmark[date] = $item->get_date();
+					$bookmark[date] = $item->get_date('Y-m-d H:i:s T');
 					
 					$arr = $item->get_item_tags('', 'category');
 					$bookmark[tags] = '';
@@ -832,7 +832,7 @@ function neop_pstlcs_post_new($automatic = 1) {
 					$bookmark[title] = $item->get_title();
 					$bookmark[link] = $item->get_link();
 					$bookmark[description] = $item->get_description();
-					$bookmark[date] = $item->get_date();
+					$bookmark[date] = $item->get_date('Y-m-d H:i:s T');
 					
 					$arr = $item->get_item_tags('', 'category');
 					$bookmark[tags] = '';
@@ -843,14 +843,14 @@ function neop_pstlcs_post_new($automatic = 1) {
 					$bookmark[title] = $item->get_title();
 					$bookmark[link] = $item->get_link();
 					$bookmark[description] = neop_pstlcs_arrelm($item->get_item_tags('http://www.google.com/schemas/reader/atom/', 'annotation'),0,'child','http://www.w3.org/2005/Atom','content',0,'data');
-					$bookmark[date] = $item->get_date();
+					$bookmark[date] = $item->get_date('Y-m-d H:i:s T');
 					$bookmark[tags] = '';
 					break;
 				case 3 : // Google Bookmarks
 					$bookmark[title] = $item->get_title();
 					$bookmark[link] = $item->get_link();
 					$bookmark[description] = neop_pstlcs_arrelm($item->get_item_tags('http://www.google.com/history/', 'bkmk_annotation'),0,'data');
-					$bookmark[date] = $item->get_date();
+					$bookmark[date] = $item->get_date('Y-m-d H:i:s T');
 					
 					$arr = $item->get_item_tags('http://www.google.com/history/', 'bkmk_label');
 					$bookmark[tags] = '';
@@ -861,25 +861,18 @@ function neop_pstlcs_post_new($automatic = 1) {
 					$bookmark[title] = $item->get_title();
 					$bookmark[link] = $item->get_link();
 					$bookmark[description] = $item->get_description();
-					$bookmark[date] = $item->get_date();
+					$bookmark[date] = $item->get_date('Y-m-d H:i:s T');
 					$bookmark[tags] = '';
 					break;
 				case 5 : // Yahoo pipes
 					$bookmark[title] = $item->get_title();
 					$bookmark[link] = $item->get_link();
 					$bookmark[description] = $item->get_description();
-					$bookmark[date] = $item->get_date();
+					$bookmark[date] = $item->get_date('Y-m-d H:i:s T');
 					$bookmark[tags] = '';
 					break;
 			}
-			
-			// Code to fix encoding in certain PHP installations.
-			/*
-			$bookmark[title] = utf8_encode($bookmark[title]);
-			$bookmark[description] = utf8_encode($bookmark[description]);
-			$bookmark[tags] = utf8_encode($bookmark[tags]);
-			*/
-			
+						
 			$ptime = strtotime($bookmark[date]);
 			
 			// strtotime seems to have some problems with certain dates in some PHP installations, so let's have some fallback code
@@ -1037,7 +1030,7 @@ function neop_pstlcs_post_new($automatic = 1) {
 		
 	} else { // if lastupdate
 		foreach($feed->get_items() as $item) {
-			$bdate = $item->get_date(); // [SERVICE] SimplePie does a pretty good job, so for now this does not depend on the service.
+			$bdate = $item->$item->get_date('Y-m-d H:i:s');; // [SERVICE] SimplePie does a pretty good job, so for now this does not depend on the service.
 			$ptime = strtotime($bdate);
 			if(!$dateend) $dateend = $ptime;
 			else if($ptime > $dateend) $dateend = $ptime;
@@ -1352,7 +1345,7 @@ function strripos($haystack, $needle) {
 endif;
 
 // Useful little helper function, works like $var[param_1]...[param_n]
-if(function_exists('neop_pstfckr_arrelm') == false) :
+if(!function_exists('neop_pstfckr_arrelm') == false) :
 function neop_pstlcs_arrelm($var) {
 	for ($i = 0; $i < func_num_args()-1; $i++) $var = $var[func_get_arg($i+1)];
      return $var;

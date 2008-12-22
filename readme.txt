@@ -14,7 +14,7 @@ Postalicious is a WordPress plugin that automatically posts your delicious, ma.g
 
 == Installation ==
 
-Postalicious uses the SimplePie Core plugin (which can be found at http://wordpress.org/extend/plugins/simplepie-core/), so before installing Postalicious you should first install and activate the SimplePie Core pluign. Once SimplePie Core is installed, simply copy "wp-postalicious.php" to the "wp-content/plugins/" folder found in your WordPress installation. Then go to the "Plugins" tab inside the WordPress administration website and activate Postalicious. Finally you need to enter your account type (delicious, ma.gnolia, Google Reader, Reddit or Yahoo Pipes) and details as well as other Postalicious preferences in the by clicking the link labeled "Postalicious" inside the "Settings" menu on the navigation bar in the WordPress administration website.
+Postalicious uses the SimplePie Core plugin (which can be found at http://wordpress.org/extend/plugins/simplepie-core/), so before installing Postalicious you should first install and activate the SimplePie Core plugin. Once SimplePie Core is installed, simply copy "wp-postalicious.php" to the "wp-content/plugins/" folder found in your WordPress installation. Then go to the "Plugins" tab inside the WordPress administration website and activate Postalicious. Finally you need to enter your account type (delicious, ma.gnolia, Google Reader, Reddit or Yahoo Pipes) and details as well as other Postalicious preferences in the by clicking the link labeled "Postalicious" inside the "Settings" menu on the navigation bar in the WordPress administration website.
 
 == Frequently Asked Questions ==
 
@@ -69,6 +69,11 @@ Postalicious is very easy to use. You only need to set up your preferences and t
 * Logs all the activity so that you know what Postalicious did and when.
 
 == Version History ==
+
+= Version 2.5rc2 =
+
+* Fixed a bug with some dates not being parsed correctly.
+* Fixed a bug which terminated execution with certain services.
 
 = Version 2.5rc2 =
 
