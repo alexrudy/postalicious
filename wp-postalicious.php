@@ -3,7 +3,7 @@
 Plugin Name: Postalicious
 Plugin URI: http://neop.gbtopia.com/?p=108
 Description: Automatically create posts with your delicious bookmarks.
-Version: 2.5rc1
+Version: 2.5rc2
 Author: Pablo Gomez
 Author URI: http://neop.gbtopia.com
 */
@@ -18,9 +18,8 @@ function neop_pstlcs_options() {
 		exit(0); // Only AJAX requests should get here so there's no reason to continue executing.
 	}
 	
-	if(!is_readable(NPD_DIR.'/simplepie.inc'))
-		exit('<div class="wrap"><h2>Postalicious is not installed properly. Please make sure that the "simplepie.inc" file bundled with Postalicious is located in the same directory as "wp-postalicious.php" (which should be located in wp-content/plugins/wp-postalicious/). If you do not know how to fix this, please check the FAQ found in the <a href="http://neop.gbtopia.com/?p=108">readme</a> file. If you\'re still lost after that feel free to contact me using <a href="http://neop.gbtopia.com/?page_id=26">this</a> form.</div>');
-	require_once(NPD_DIR.'/simplepie.inc');
+	if(!class_exists('SimplePie'))
+		exit('<div class="wrap"><h2>Postalicious needs the <a href="http://wordpress.org/extend/plugins/simplepie-core/">SimplePie Core</a> plugin to work, please install this plugin and try again. If you run into any problems, please check the FAQ found in the <a href="http://neop.gbtopia.com/?p=108">readme</a> file. If you\'re still lost after that feel free to contact me using <a href="http://neop.gbtopia.com/?page_id=26">this</a> form.</div>');
 	global $wpdb, $wp_db_version, $utw, $STagging;
 	$numusers = $wpdb->query("SELECT $wpdb->users.ID, $wpdb->users.display_name FROM $wpdb->users,$wpdb->usermeta WHERE $wpdb->users.ID = $wpdb->usermeta.user_id && $wpdb->usermeta.meta_key = '{$wpdb->prefix}user_level' && $wpdb->usermeta.meta_value > 1 ORDER BY $wpdb->users.display_name");
 	$userids = $wpdb->get_col(NULL,0);
@@ -689,8 +688,7 @@ endif;
 
 if (!function_exists('neop_pstlcs_post_new')) :
 function neop_pstlcs_post_new($automatic = 1) {
-	if(!is_readable(NPD_DIR.'/simplepie.inc')) exit();
-	require_once(NPD_DIR.'/simplepie.inc');
+	if(!class_exists('SimplePie')) exit();
 	global $wpdb, $wp_db_version, $utw, $STagging;
 	$nd_updating = get_option('nd_updating');
 	if($nd_updating && get_option('nd_lastrun') + 300 > time()) {

@@ -66,6 +66,10 @@ Postalicious is very easy to use. You only need to set up your preferences and t
 
 == Version History ==
 
+= Version 2.5rc2 =
+
+* Switched to SimplePie Core instead of including a copy of SimplePie.
+
 = Version 2.5rc1 =
 
 * Got rid of the rss.php file, updating it every time a new version of WordPress was released was not very user-friendly.
