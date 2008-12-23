@@ -70,7 +70,11 @@ Postalicious is very easy to use. You only need to set up your preferences and t
 
 == Version History ==
 
-= Version 2.5rc2 =
+= Version 2.5rc4 =
+
+* Fixed a typo in the code which prevented new users from updating.
+
+= Version 2.5rc3 =
 
 * Fixed a bug with some dates not being parsed correctly.
 * Fixed a bug which terminated execution with certain services.

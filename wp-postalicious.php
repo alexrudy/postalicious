@@ -3,7 +3,7 @@
 Plugin Name: Postalicious
 Plugin URI: http://neop.gbtopia.com/?p=108
 Description: Automatically create posts with your delicious bookmarks.
-Version: 2.5rc3
+Version: 2.5rc4
 Author: Pablo Gomez
 Author URI: http://neop.gbtopia.com
 */
@@ -1030,7 +1030,7 @@ function neop_pstlcs_post_new($automatic = 1) {
 		
 	} else { // if lastupdate
 		foreach($feed->get_items() as $item) {
-			$bdate = $item->$item->get_date('Y-m-d H:i:s');; // [SERVICE] SimplePie does a pretty good job, so for now this does not depend on the service.
+			$bdate = $item->get_date('Y-m-d H:i:s');; // [SERVICE] SimplePie does a pretty good job, so for now this does not depend on the service.
 			$ptime = strtotime($bdate);
 			if(!$dateend) $dateend = $ptime;
 			else if($ptime > $dateend) $dateend = $ptime;
