@@ -3,7 +3,7 @@
 Plugin Name: Postalicious
 Plugin URI: http://neop.gbtopia.com/?p=108
 Description: Automatically create posts with your delicious bookmarks.
-Version: 2.5
+Version: 2.5.1
 Author: Pablo Gomez
 Author URI: http://neop.gbtopia.com
 */
@@ -368,7 +368,7 @@ function neop_pstlcs_options() {
 		<div id="icon-options-general" class="icon32"><br /></div>
 		<h2>Postalicious options</h2>
 		<div style="border: 1px solid black; margin:1em; padding:1em;">
-		<table width="100%"><tr><td>Postalicious is the result of many hours of hard work, if you enjoy using it, please consider donating by clicking the PayPal button on the right.</td>
+		<table width="100%"><tr><td>Postalicious is the result of many hours of hard work, if you enjoy using it, please consider donating by clicking the PayPal button on the right.<br />Having a problem with Postalicious? Feel free to send me an email using <a href="http://neop.gbtopia.com/?page_id=26">this</a> form.</td>
 		<td align="right">
 		<form action="https://www.paypal.com/cgi-bin/webscr" method="post" style="display:inline;" />
 		<input type="hidden" name="cmd" value="_s-xclick" />
