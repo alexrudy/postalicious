@@ -3,12 +3,10 @@
 Plugin Name: Postalicious
 Plugin URI: http://neop.gbtopia.com/?p=108
 Description: Automatically create posts with your delicious bookmarks.
-Version: 2.5rc4
+Version: 2.5
 Author: Pablo Gomez
 Author URI: http://neop.gbtopia.com
 */
-
-define('NPD_DIR', dirname(__FILE__));
 
 if (!function_exists('neop_pstlcs_options')) :
 function neop_pstlcs_options() {
@@ -368,7 +366,7 @@ function neop_pstlcs_options() {
 	</script>
 	<div class="wrap">
 		<div id="icon-options-general" class="icon32"><br /></div>
-		<h2>Postaflickr options</h2>
+		<h2>Postalicious options</h2>
 		<div style="border: 1px solid black; margin:1em; padding:1em;">
 		<table width="100%"><tr><td>Postalicious is the result of many hours of hard work, if you enjoy using it, please consider donating by clicking the PayPal button on the right.</td>
 		<td align="right">
@@ -1345,7 +1343,7 @@ function strripos($haystack, $needle) {
 endif;
 
 // Useful little helper function, works like $var[param_1]...[param_n]
-if(!function_exists('neop_pstfckr_arrelm') == false) :
+if(!function_exists('neop_pstlcs_arrelm') == false) :
 function neop_pstlcs_arrelm($var) {
 	for ($i = 0; $i < func_num_args()-1; $i++) $var = $var[func_get_arg($i+1)];
      return $var;
