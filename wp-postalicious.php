@@ -1343,7 +1343,7 @@ function strripos($haystack, $needle) {
 endif;
 
 // Useful little helper function, works like $var[param_1]...[param_n]
-if(!function_exists('neop_pstlcs_arrelm') == false) :
+if(!function_exists('neop_pstlcs_arrelm')) :
 function neop_pstlcs_arrelm($var) {
 	for ($i = 0; $i < func_num_args()-1; $i++) $var = $var[func_get_arg($i+1)];
      return $var;
