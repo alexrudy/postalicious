@@ -3,7 +3,7 @@
 Plugin Name: Postalicious
 Plugin URI: http://neop.gbtopia.com/?p=108
 Description: Automatically create posts with your delicious bookmarks.
-Version: 2.5.1
+Version: 2.6
 Author: Pablo Gomez
 Author URI: http://neop.gbtopia.com
 */
@@ -116,6 +116,8 @@ function neop_pstlcs_options() {
 		update_option('nd_tagtemplate',stripslashes($_POST['nd_tagtemplate']));
 		update_option('nd_posttsingle',stripslashes($_POST['nd_posttsingle']));
 		update_option('nd_posttdouble',stripslashes($_POST['nd_posttdouble']));
+		update_option('nd_excerpttsingle',stripslashes($_POST['nd_excerpttsingle']));
+		update_option('nd_excerpttdouble',stripslashes($_POST['nd_excerpttdouble']));
 		
 		if($_POST['nd_use_post_tags']) update_option('nd_use_post_tags',1);
 		else update_option('nd_use_post_tags',0);
@@ -216,6 +218,10 @@ function neop_pstlcs_options() {
 	if(!($nd_tagtemplate = get_option('nd_tagtemplate'))) $nd_tagtemplate = '<a href="%tagurl%">%tagname%</a> ';
 	if(!($nd_posttsingle = get_option('nd_posttsingle'))) $nd_posttsingle = "<p>These are my links for %datestart% from %datestart{H:i}% to %dateend{H:i}%:</p>\n<ul>\n%bookmarks%\n</ul>";
 	if(!($nd_posttdouble = get_option('nd_posttdouble'))) $nd_posttdouble = "<p>These are my links for %datestart% through %dateend%:</p>\n<ul>\n%bookmarks%\n</ul>";
+	if(!($nd_excerpttsingle = get_option('nd_excerpttsingle'))) $nd_excerpttsingle = "<p>These are my links for %datestart% from %datestart{H:i}% to %dateend{H:i}%</p>";
+	if(!($nd_excerpttdouble = get_option('nd_excerpttdouble'))) $nd_excerpttdouble = "<p>These are my links for %datestart% through %dateend%</p>";
+	
+	
 	
 	if(!($nd_use_post_tags = get_option('nd_use_post_tags'))) $nd_use_post_tags = 0;
 	if(!($nd_post_tags = get_option('nd_post_tags'))) $nd_post_tags = '';
@@ -233,6 +239,8 @@ function neop_pstlcs_options() {
 	$nd_tagtemplate = htmlentities($nd_tagtemplate);
 	$nd_posttsingle = htmlentities($nd_posttsingle);
 	$nd_posttdouble = htmlentities($nd_posttdouble);
+	$nd_excerpttsingle = htmlentities($nd_excerpttsingle);
+	$nd_excerpttdouble = htmlentities($nd_excerpttdouble);
 	$nd_post_tags = htmlentities($nd_post_tags);
 	
 	if(!($nd_log = get_option('nd_log'))) $nd_log = 'There is no logged activity.';
@@ -597,6 +605,12 @@ function neop_pstlcs_options() {
 		<h3>Post template (two days)</h3>
 		<p>This is the template for the body of the posts created by Postalicious with bookmarks for a range of dates. %bookmarks% should be placed where you want the list of bookmarks to be shown, each bookmark will have the format specified by the bookmark template. %datestart% and %dateend% will be replaced by the oldest and newest dates of the bookmarks in the post.</p>
 		<textarea name="nd_posttdouble" id="nd_posttdouble" style="width: 98%;" rows="8" cols="50" onchange="this.form.nd_settingschanged.value=1"><?php echo $nd_posttdouble; ?></textarea>
+		<h3>Post excerpt (single day)</h3>
+		<p>This is the template for the excerpt of the posts created by Postalicious with bookmarks for one day only. %bookmarks% should be placed where you want the list of bookmarks to be shown, each bookmark will have the format specified by the bookmark template. %datestart% and %dateend% will be replaced by the oldest and newest dates of the bookmarks in the post.</p>
+		<textarea name="nd_excerpttsingle" id="nd_excerpttsingle" style="width: 98%;" rows="8" cols="50" onchange="this.form.nd_settingschanged.value=1"><?php echo $nd_excerpttsingle; ?></textarea>
+		<h3>Post excerpt (two days)</h3>
+		<p>This is the template for the excerpt of the posts created by Postalicious with bookmarks for a range of dates. %bookmarks% should be placed where you want the list of bookmarks to be shown, each bookmark will have the format specified by the bookmark template. %datestart% and %dateend% will be replaced by the oldest and newest dates of the bookmarks in the post.</p>
+		<textarea name="nd_excerpttdouble" id="nd_excerpttdouble" style="width: 98%;" rows="8" cols="50" onchange="this.form.nd_settingschanged.value=1"><?php echo $nd_excerpttdouble; ?></textarea>
 		<h3>Activity Log</h3>
 		<textarea readonly="readonly" name="nd_log" id="nd_log" style="width: 98%;" rows="20" cols="50"><?php echo $nd_log; ?></textarea>
 		<input type="button" class="button-secondary" value="Clear Log" onclick="nd_clearthelog()" /><span id="nd_clogspan" style="margin-left:5px;"></span>
@@ -655,13 +669,16 @@ function neop_pstlcs_update() {
 		$nd_use_del_tags = get_option('nd_use_del_tags');
 		if($nd_use_del_tags == 'yes') update_option('nd_use_post_tags',1);
 		else update_option('nd_use_post_tags',0);
-		// Update the templates to use %date% to %datestart% in single title and single body templates.
+		// Update the templates to use %date% to %datestart% in single title, single body and single excerpt templates.
 		$nd_titlesingle = get_option('nd_titlesingle');
 		$nd_titlesingle = str_replace('%date%','%datestart%',$nd_titlesingle);
 		update_option('nd_titlesingle',$nd_titlesingle);
 		$nd_posttsingle = get_option('nd_posttsingle');
 		$nd_posttsingle = str_replace('%date%','%datestart%',$nd_posttsingle);
 		update_option('nd_posttsingle',$nd_posttsingle);
+		$nd_excerpttsingle = get_option('nd_excerpttsingle');
+		$nd_excerpttsingle = str_replace('%date%','%datestart%',$nd_excerpttsingle);
+		update_option('nd_excerpttsingle',$nd_excerpttsingle);
 		// Change %description% to %title% and %extended% to %description% in the link template
 		$nd_linktemplate = get_option('nd_linktemplate');
 		$nd_linktemplate = str_replace('%description%','%title%',$nd_linktemplate);
@@ -1081,9 +1098,11 @@ function neop_pstlcs_push_post($numero,$postarray) {
 	if(date('dmY',$ldstart) == date('dmY',$ldend)) { // Single day template
 		if(!($posttitle = get_option('nd_titlesingle'))) $posttitle = 'Bookmarks for %datestart% from %datestart{H:i}% to %dateend{H:i}%';
 		if(!($postbody = get_option('nd_posttsingle'))) $postbody = "<p>These are my links for %datestart% from %datestart{H:i}% to %dateend{H:i}%:</p>\n<ul>\n%bookmarks%\n</ul>";
+		if(!($postexcerpt = get_option('nd_excerpttsingle'))) $postexcerpt = "<p>These are my links for %datestart% from %datestart{H:i}% to %dateend{H:i}%";
 	} else { // Two day template
 		if(!($posttitle = get_option('nd_titledouble'))) $posttitle = 'Bookmarks for %datestart% through %dateend%';
 		if(!($postbody = get_option('nd_posttdouble'))) $postbody = "<p>These are my links for %datestart% through %dateend%:</p>\n<ul>\n%bookmarks%\n</ul>";
+		if(!($postexcerpt = get_option('nd_excerpttdouble'))) $postexcerpt = "<p>These are my links for %datestart% through %dateend%:</p>\n<ul>\n%bookmarks%\n</ul>";
 	}
 	
 	// If we were given a draft, add the links from the draft.
@@ -1100,15 +1119,21 @@ function neop_pstlcs_push_post($numero,$postarray) {
 	$posttitle = str_replace("%dateend%",$dateend,$posttitle);
 	$postbody = str_replace("%datestart%",$datestart,$postbody);
 	$postbody = str_replace("%dateend%",$dateend,$postbody);
+	$postexcerpt = str_replace("%datestart%",$datestart,$postexcerpt);
+	$postexcerpt = str_replace("%dateend%",$dateend,$postexcerpt);
+	
 	
 	// Replace dates with custom format.
 	$posttitle = preg_replace('/%datestart\{([^\}]*)\}%/e','mysql2date(\'$1\',date(\'Y-m-d H:i:s\',$ldstart))',$posttitle);
 	$posttitle = preg_replace('/%dateend\{([^\}]*)\}%/e','mysql2date(\'$1\',date(\'Y-m-d H:i:s\',$ldend))',$posttitle);
 	$postbody = preg_replace('/%datestart\{([^\}]*)\}%/e','mysql2date(\'$1\',date(\'Y-m-d H:i:s\',$ldstart))',$postbody);
 	$postbody = preg_replace('/%dateend\{([^\}]*)\}%/e','mysql2date(\'$1\',date(\'Y-m-d H:i:s\',$ldend))',$postbody);
+	$postexcerpt = preg_replace('/%datestart\{([^\}]*)\}%/e','mysql2date(\'$1\',date(\'Y-m-d H:i:s\',$ldstart))',$postexcerpt);
+	$postexcerpt = preg_replace('/%dateend\{([^\}]*)\}%/e','mysql2date(\'$1\',date(\'Y-m-d H:i:s\',$ldend))',$postexcerpt);
 	
-	// Create the post body
+	// Create the post body and post excerpt
 	$postbody = str_replace("%bookmarks%",$postlinks,$postbody);
+	$postexcerpt = str_replace("%bookmarks%",$postlinks,$postexcerpt);
 	
 	// Replace the title if we have it
 	if($bookmarkt) {
@@ -1122,6 +1147,7 @@ function neop_pstlcs_push_post($numero,$postarray) {
 	
 	// Escape the body and title
 	$postbody = $wpdb->escape($postbody);
+	$postexcerpt = $wpdb->escape($postexcerpt);
 	$posttitle = $wpdb->escape($posttitle);
 	
 	// Get everyting we need to create the post.
@@ -1158,7 +1184,7 @@ function neop_pstlcs_push_post($numero,$postarray) {
 	}
 	
 	// Create array for wp_update_post or wp_insert_post
-	$parray = array('post_title'=>$posttitle,'post_content'=>$postbody,'no_filter' => true);
+	$parray = array('post_title'=>$posttitle,'post_content'=>$postbody,'post_content_filtered'=>$postbody,'post_excerpt'=>$postexcerpt,'no_filter' => true);
 	if($nd_slugtemplate != '') {
 		// Replace dates with default format
 		$nd_slugtemplate = str_replace("%datestart%",$datestart,$nd_slugtemplate);
