@@ -72,7 +72,7 @@ Postalicious is very easy to use. You only need to set up your preferences and t
 
 = Version 2.6 =
 
-* Added post excerpt template 
+* Added post excerpt template.
 
 = Version 2.5 =
 
