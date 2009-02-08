@@ -4,7 +4,7 @@ Donate link: http://neop.gbtopia.com/?p=108
 Tags: bookmarks, delicious, ma.gnolia, Google Reader, Reddit, Yahoo Pipes
 Requires at least: 2.1
 Tested up to: 2.7
-Stable tag: 2.6
+Stable tag: 2.7
 
 Postalicious is a WordPress plugin that automatically posts your delicious, ma.gnolia, Google Reader, Reddit or Yahoo Pipes bookmarks to your blog.
 
@@ -30,13 +30,6 @@ All the dates in Postalicious use the time zone specified in the General Options
 
 In theory, yes. Postalicious 2.0 introduced some new ways to handle special characters which should work in all WordPress installations. However, if you are having problems with special characters, feel free to contact me.
 
-= How do all the limiting options work? =
-
-"Publish any posts with the minimum number of bookmarks" - Pretty self explanatory, publishes posts as soon after an update that adds enough bookmarks to meet the minimum number of bookmarks per post.
-"At most # bookmarks per post" - Publishes posts when they reach the maximum number of posts, or after an update if the number of bookmarks is greater than the minimum, even if it is less than the maximum. If the minimum number of posts and the maximum number of posts are the same, then posts will have exactly that number of bookmarks.
-"Keep at least # hours between posts" - The same as the first option, but posts will be held post until the determined number of hours has passed after the last published posts. It is important to note, that if a post has the minimum number of bookmarks, it will be posted as soon as the determined number of  hours have passed even if no new bookmarks were added to the post in the last update.
-"Post at most once every # hours at (time)" - Similar to the previous option, but in this case posts will only be published once every certain number of days at the first update after the specified time. As with the previous option, if an unpublished posts has enough bookmarks to meet the required minimum it will be published during the first update after the timing conditions are met. This behavior is intended to emulate previous version of Postalicious which only attempted to publish one post per day after 12:30 GMT. It should be noted that the time must be specified in the same time zone selected in WordPress's General Settings.
-
 = Can I used different date formats? =
 
 Yes. Please read the section titled "Custom date formats" for more information about this.
@@ -51,7 +44,7 @@ Yes. Just set the both the minimum and the maximum number of bookmarks per post 
 
 = Why are tag-related features disabled? =
 
-Reddit, and Yahoo Pipes do not support tags. Google Reader does support tags, but those tags are not available in the RSS feed, therefore POstalicious can't fetch them. 
+Reddit and Yahoo Pipes do not support tags. Google Reader does support tags, but those tags are not available in the RSS feed, therefore POstalicious can't fetch them. 
 
 == Usage ==
 
@@ -69,6 +62,17 @@ Postalicious is very easy to use. You only need to set up your preferences and t
 * Logs all the activity so that you know what Postalicious did and when.
 
 == Version History ==
+
+= Version 2.7rc1 =
+
+* Completely revamped the limiting system. The new system is much more flexible and simpler to use.
+* Postalicious now uses the post scheduling provided by WordPress to publish posts at the right time.
+* Added custom fields with the bookmark's info to posts created by Postalicious with only one bookmark.
+* Improved the excerpt template. Leaving it blank will now let WordPress automatically generate it.
+* Added Jumptags support.
+* Fixed a few minor bugs.
+* Fixed a few typos.
+* General code cleanup. 
 
 = Version 2.6 =
 
