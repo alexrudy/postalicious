@@ -3,7 +3,7 @@
 Plugin Name: Postalicious
 Plugin URI: http://neop.gbtopia.com/?p=108
 Description: Automatically create posts with your delicious bookmarks.
-Version: 2.7rc1
+Version: 2.8
 Author: Pablo Gomez
 Author URI: http://neop.gbtopia.com
 */
@@ -20,8 +20,13 @@ function neop_pstlcs_options() {
 		exit(0); // Only AJAX requests should get here so there's no reason to continue executing.
 	}
 	
-	if(!class_exists('SimplePie'))
-		exit('<div class="wrap"><h2>Postalicious needs the <a href="http://wordpress.org/extend/plugins/simplepie-core/">SimplePie Core</a> plugin to work, please install this plugin and try again. If you run into any problems, please check the FAQ found in the <a href="http://neop.gbtopia.com/?p=108">readme</a> file. If you\'re still lost after that feel free to contact me using <a href="http://neop.gbtopia.com/?page_id=26">this</a> form.</div>');
+	
+	if(!class_exists('SimplePie')) {
+		if(file_exists(ABSPATH . WPINC . '/class-simplepie.php'))
+			include_once(ABSPATH . WPINC . '/class-simplepie.php');
+		else
+			exit('<div class="wrap"><h2>Postalicious needs the <a href="http://wordpress.org/extend/plugins/simplepie-core/">SimplePie Core</a> plugin to work, please install this plugin and try again. If you run into any problems, please check the FAQ found in the <a href="http://neop.gbtopia.com/?p=108">readme</a> file. If you\'re still lost after that feel free to contact me using <a href="http://neop.gbtopia.com/?page_id=26">this</a> form.</div>');
+	}
 	global $wpdb, $wp_db_version, $utw, $STagging;
 	$numusers = $wpdb->query("SELECT $wpdb->users.ID, $wpdb->users.display_name FROM $wpdb->users,$wpdb->usermeta WHERE $wpdb->users.ID = $wpdb->usermeta.user_id && $wpdb->usermeta.meta_key = '{$wpdb->prefix}user_level' && $wpdb->usermeta.meta_value > 1 ORDER BY $wpdb->users.display_name");
 	$userids = $wpdb->get_col(NULL,0);
@@ -142,7 +147,7 @@ function neop_pstlcs_options() {
 			if(!($service = get_option('nd_service'))) $service = 0;
 			if($username) {
 				switch($service) { // [SERVICE]
-					case 0 : $rssurl = "http://feeds.delicious.com/v2/rss/$username"; break; // delicious
+					case 0 : $rssurl =  $usernameraw; break; // delicious
 					case 1 : $rssurl = "http://ma.gnolia.com/rss/lite/people/$username"; break; // ma.gnolia
 					case 2 : $rssurl = $usernameraw; break; // Google Reader
 					case 3 : $rssurl = $usernameraw; break; // Google Bookmarks
@@ -250,8 +255,8 @@ function neop_pstlcs_options() {
 	// [SERVICE]
 	$tagsdisabled = 0;
 	if($nd_service == 2 || $nd_service == 4 || $nd_service == 5) $tagsdisabled = 1;
-	$urlservice = 0;
-	if($nd_service >= 2 && $nd_service != 6) $urlservice = 1;
+	$urlservice = 1;
+	if($nd_service == 1 || $nd_service == 6) $urlservice = 0;
 	
 ?>
 	<script type="text/javascript">
@@ -277,9 +282,8 @@ function neop_pstlcs_options() {
 					else return 0;
 					break;
 				case 'url' :
-					if(service == 6) return 0;
-					else if(service >= 2) return 1;
-					else return 0;
+					if(service == 1 || service == 6) return 0;
+					else return 1;
 					break;
 			}
 		}
@@ -656,7 +660,7 @@ endif;
 
 if (!function_exists('neop_pstlcs_update')) :
 function neop_pstlcs_update() {
-	if(!($nd_version = get_option('nd_version'))) $nd_version = 270; // Because of a bug in 121, get_option('nd_version') will always be at least 150
+	if(!($nd_version = get_option('nd_version'))) $nd_version = 280; // Because of a bug in 121, get_option('nd_version') will always be at least 150
 	if($nd_version < 121) {
 		if(get_option('nd_utw_enabled') == 'yes') {
 			update_option('nd_tagging_enabled','yes');
@@ -764,13 +768,21 @@ function neop_pstlcs_update() {
 		delete_option('nd_excerpttdouble');
 		$nd_version = 270;
 	}
+	if($nd_version < 280) {
+		if(get_option('nd_service') == 0)
+			update_option('nd_username','http://feeds.delicious.com/v2/rss/'.urlencode(get_option('nd_username')));
+	}
 	update_option('nd_version',$nd_version);
 }
 endif;
 
 if (!function_exists('neop_pstlcs_post_new')) :
 function neop_pstlcs_post_new($automatic = 1) {
-	if(!class_exists('SimplePie')) exit();
+	if(!class_exists('SimplePie')) {
+		if(file_exists(ABSPATH . WPINC . '/class-simplepie.php'))
+			include_once(ABSPATH . WPINC . '/class-simplepie.php');
+		else exit();
+	}
 	global $wpdb, $wp_db_version, $utw, $STagging;
 	$nd_updating = get_option('nd_updating');
 	if($nd_updating && get_option('nd_lastrun') + 300 > time()) {
@@ -791,7 +803,7 @@ function neop_pstlcs_post_new($automatic = 1) {
 
 	if($username) { // [SERVICE]
 		switch($service) {
-			case 0 : $rssurl = "http://feeds.delicious.com/v2/rss/$username"; break; // delicious
+			case 0 : $rssurl =  $usernameraw; break; // delicious
 			case 1 : $rssurl = "http://ma.gnolia.com/rss/lite/people/$username"; break; // ma.gnolia
 			case 2 : $rssurl = $usernameraw; break; // Google Reader
 			case 3 : $rssurl = $usernameraw; break; // Google Bookmarks

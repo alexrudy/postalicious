@@ -3,10 +3,10 @@ Contributors: neop
 Donate link: http://neop.gbtopia.com/?p=108
 Tags: bookmarks, delicious, ma.gnolia, Google Reader, Reddit, Yahoo Pipes
 Requires at least: 2.1
-Tested up to: 2.7
-Stable tag: 2.7
+Tested up to: 2.9
+Stable tag: 2.8
 
-Postalicious is a WordPress plugin that automatically posts your delicious, ma.gnolia, Google Reader, Reddit or Yahoo Pipes bookmarks to your blog.
+Postalicious is a WordPress plugin that automatically posts your delicious, ma.gnolia, Google Reader, Reddit, Yahoo Pipes, or Jumptags bookmarks to your blog.
 
 == Description ==
 
@@ -14,13 +14,13 @@ Postalicious is a WordPress plugin that automatically posts your delicious, ma.g
 
 == Installation ==
 
-Postalicious uses the SimplePie Core plugin (which can be found at http://wordpress.org/extend/plugins/simplepie-core/), so before installing Postalicious you should first install and activate the SimplePie Core plugin. Once SimplePie Core is installed, simply copy "wp-postalicious.php" to the "wp-content/plugins/" folder found in your WordPress installation. Then go to the "Plugins" tab inside the WordPress administration website and activate Postalicious. Finally you need to enter your account type (delicious, ma.gnolia, Google Reader, Reddit or Yahoo Pipes) and details as well as other Postalicious preferences in the by clicking the link labeled "Postalicious" inside the "Settings" menu on the navigation bar in the WordPress administration website.
+Simply copy "wp-postalicious.php" to the "wp-content/plugins/" folder found in your WordPress installation. Then go to the "Plugins" tab inside the WordPress administration website and activate Postalicious. Finally you need to enter your account type (delicious, ma.gnolia, Google Reader, Reddit or Yahoo Pipes) and details as well as other Postalicious preferences in the by clicking the link labeled "Postalicious" inside the "Settings" menu on the navigation bar in the WordPress administration website.
 
 == Frequently Asked Questions ==
 
 = What's all this about SimplePie Core?  =
 
-SimplePie is a PHP library that parses RSS feeds. There are several WordPress plugins that use SimplePie so to avoid conflicts caused by having multiple versions of SimplePie installed, the guys that make SimplePie decided to make their own WordPress plugin which only loads the SimplePie plugin so that any other plugin can use SimplePie without causing conflicts with other plugins. You can get SimplePie plugin here: http://wordpress.org/extend/plugins/simplepie-core/
+SimplePie is a PHP library that parses RSS feeds. In WordPress 2.8 and later SimplePie is already included, for previous versions of WordPress you need to install the SimplePie plugin, which you can get here: http://wordpress.org/extend/plugins/simplepie-core/
 
 = Which time zone does Postalicious use?  =
 
@@ -62,6 +62,11 @@ Postalicious is very easy to use. You only need to set up your preferences and t
 * Logs all the activity so that you know what Postalicious did and when.
 
 == Version History ==
+
+= Version 2.8 =
+
+* Postalicious now uses the bundled SimplePie version when available.
+* Some people where having problems with Postalicious being unable to fetch the delicious feeds, unfortunately there's not much I can do about it since it's caused by a change in the delicious's server configuration. A workaround is to route the delicious RSS feed through some service such as Feedburner. To enable this functionality, I've changed delicious to be a URL service.
 
 = Version 2.7rc1 =
 
