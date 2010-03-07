@@ -3,7 +3,7 @@
 Plugin Name: Postalicious
 Plugin URI: http://neop.gbtopia.com/?p=108
 Description: Automatically create posts with your delicious bookmarks.
-Version: 2.8
+Version: 2.8.1
 Author: Pablo Gomez
 Author URI: http://neop.gbtopia.com
 */
@@ -771,6 +771,7 @@ function neop_pstlcs_update() {
 	if($nd_version < 280) {
 		if(get_option('nd_service') == 0)
 			update_option('nd_username','http://feeds.delicious.com/v2/rss/'.urlencode(get_option('nd_username')));
+		$nd_version = 280;
 	}
 	update_option('nd_version',$nd_version);
 }

@@ -65,6 +65,10 @@ Postalicious is very easy to use. You only need to set up your preferences and t
 
 = Version 2.8 =
 
+* Fixed a bug where Postalicious kept updating the delicious URL.
+
+= Version 2.8 =
+
 * Postalicious now uses the bundled SimplePie version when available.
 * Some people where having problems with Postalicious being unable to fetch the delicious feeds, unfortunately there's not much I can do about it since it's caused by a change in the delicious's server configuration. A workaround is to route the delicious RSS feed through some service such as Feedburner. To enable this functionality, I've changed delicious to be a URL service.
 
