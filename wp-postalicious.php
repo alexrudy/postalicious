@@ -3,7 +3,7 @@
 Plugin Name: Postalicious
 Plugin URI: http://neop.gbtopia.com/?p=108
 Description: Automatically create posts with your delicious bookmarks.
-Version: 2.8.1
+Version: 2.8.2
 Author: Pablo Gomez
 Author URI: http://neop.gbtopia.com
 */
@@ -156,6 +156,7 @@ function neop_pstlcs_options() {
 					case 6 : $rssurl = "http://www.jumptags.com/{$username}?rss=xml"; break; // Jumptags
 				}
 				$feed = new SimplePie();
+				$feed->set_useragent("Postalicious 2.8.2");
 				$feed->set_feed_url($rssurl);
 				$feed->enable_cache(false);
 				$success = $feed->init();
@@ -845,6 +846,7 @@ function neop_pstlcs_post_new($automatic = 1) {
 	$lastupdate = get_option('nd_lastupdate');
 	// Initiate a SimplePie instance for the feed.
 	$feed = new SimplePie();
+	$feed->set_useragent("Postalicious 2.8.2");
 	$feed->set_feed_url($rssurl);
 	$feed->enable_cache(false);
 	$success = $feed->init();

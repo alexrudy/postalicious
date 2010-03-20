@@ -63,7 +63,11 @@ Postalicious is very easy to use. You only need to set up your preferences and t
 
 == Version History ==
 
-= Version 2.8 =
+= Version 2.8.2 =
+
+* Changed the user-agent used to fetch the feeds, maybe this will fix the recent problems between Postalicioius and delicious feeds.
+
+= Version 2.8.1 =
 
 * Fixed a bug where Postalicious kept updating the delicious URL.
 
