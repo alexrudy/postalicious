@@ -3,7 +3,7 @@
 Plugin Name: Postalicious
 Plugin URI: http://neop.gbtopia.com/?p=108
 Description: Automatically create posts with your delicious bookmarks.
-Version: 2.8.2
+Version: 2.8.3
 Author: Pablo Gomez
 Author URI: http://neop.gbtopia.com
 */
@@ -161,7 +161,7 @@ function neop_pstlcs_options() {
 				$feed->enable_cache(false);
 				$success = $feed->init();
 				$feed->handle_content_type();
-				if(!$success) {
+				if(!$success || $feed->error()) {
 					if($message != '') $message .= '<br />';
 					$message .= "Automatic hourly updates activation failed. Unable to establish connection. SimplePie said: " . $feed->error();
 				} else { // Add cron
@@ -852,7 +852,7 @@ function neop_pstlcs_post_new($automatic = 1) {
 	$success = $feed->init();
 	$feed->handle_content_type();
 		
-	if(!$success) {
+	if(!$success || $feed->error()) {
 		if(!($failed = get_option('nd_failedcount'))) $failed = 0;
 		if($automatic) $failed++;
 		if($failed >= 24) {
