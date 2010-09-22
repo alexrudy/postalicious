@@ -3,8 +3,8 @@ Contributors: neop
 Donate link: http://neop.gbtopia.com/?p=108
 Tags: bookmarks, delicious, ma.gnolia, Google Reader, Reddit, Yahoo Pipes
 Requires at least: 2.1
-Tested up to: 2.9
-Stable tag: 2.8
+Tested up to: 3.0.1
+Stable tag: 2.9
 
 Postalicious is a WordPress plugin that automatically posts your delicious, ma.gnolia, Google Reader, Reddit, Yahoo Pipes, or Jumptags bookmarks to your blog.
 
@@ -42,6 +42,10 @@ Yes, however you need to specify which tags do you with to allow in the Postalic
 
 Yes. Just set the both the minimum and the maximum number of bookmarks per post to 1. Additionally, when limiting posts to one bookmark per post the %title% tag becomes available to be used in the post title template.
 
+= Can Postalicious post bookmarks from multiple feeds? =
+
+Yes, thanks to Meitar Moscovitz (http://maymay.net/) Postalicious can now post bookmarks from multiple feeds. Each WordPress user can specify their own feed in the "Postalicious User Options" section in their profile inside the WordPress admin area. Postalicious will then fetch the newest bookmarks from each user's feed (as well as the default feed in Postalicious settings page) and post all of the bookmarks together in a single post. Unfortunately, all of the specified feeds must use the same service for this to work properly. 
+
 = Why are tag-related features disabled? =
 
 Reddit and Yahoo Pipes do not support tags. Google Reader does support tags, but those tags are not available in the RSS feed, therefore POstalicious can't fetch them. 
@@ -62,6 +66,11 @@ Postalicious is very easy to use. You only need to set up your preferences and t
 * Logs all the activity so that you know what Postalicious did and when.
 
 == Version History ==
+
+= Version 2.9 =
+
+* Added support for publishing bookmarks from multiple sources. For details on how this works, check the FAQ. (Thanks Meitar!)
+* Added %currentdate% to the title and body templates.
 
 = Version 2.8.3 =
 
