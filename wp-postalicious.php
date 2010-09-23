@@ -3,7 +3,7 @@
 Plugin Name: Postalicious
 Plugin URI: http://neop.gbtopia.com/?p=108
 Description: Automatically create posts with your delicious bookmarks.
-Version: 2.9.1
+Version: 2.9.2
 Author: Pablo Gomez
 Author URI: http://neop.gbtopia.com
 */
@@ -1138,7 +1138,11 @@ function neop_pstlcs_post_new($automatic = 1) {
                     $tag = '';
                     if($bookmark['tags'] != '') {
                         switch($service) { // [SERVICE]
-                            case 0 : $nd_site_tagurl = "http://delicious.com/{$username}/"; break; //delicious
+                            case 0 : //delicious
+                            	$tagUsername = preg_replace('/http:\/\/feeds.delicious.com\/v2\/rss\/([^\/]*).*/','$1',$username);
+                            	if($tagUsername == $username) $nd_site_tagurl = 'http://www.delicious.com/tag/'; // $username is an unrecognized url.
+                            	else  $nd_site_tagurl = "http://delicious.com/{$tagUsername}/";
+                            	break; 
                             case 1 : $nd_site_tagurl = "http://ma.gnolia.com/people/{$username}/tags/"; break; // ma.gnolia
                             case 2 : $nd_site_tagurl = '#'; break; // Google Reader (we should never get here)
                             case 3 : $nd_site_tagurl = '#'; break; // Google Bookmarks does not have a public tag url.

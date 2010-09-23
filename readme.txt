@@ -71,6 +71,10 @@ Postalicious is very easy to use. You only need to set up your preferences and t
 
 == Changelog ==
 
+= Version 2.9.2 =
+
+* Fixed tag urls for delicious.
+
 = Version 2.9.1 =
 
 * Postalicious now honors user capabilities; if a user can not publish posts on the blog, then their feed content will be inserted as Pending Review instead of Published even if Postalicious is configured to publish posts (instead of creating draft posts).
