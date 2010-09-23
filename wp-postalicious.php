@@ -3,7 +3,7 @@
 Plugin Name: Postalicious
 Plugin URI: http://neop.gbtopia.com/?p=108
 Description: Automatically create posts with your delicious bookmarks.
-Version: 2.9
+Version: 2.9.1
 Author: Pablo Gomez
 Author URI: http://neop.gbtopia.com
 */
@@ -1171,7 +1171,6 @@ function neop_pstlcs_post_new($automatic = 1) {
 
                     // Submit depending on maximum settings.
                     if($count == $nd_maxcount) { // We know $count is not zero so this is safe.
-                        // TODO: Check user capabilities; force "draftstatus" to draft (not publish) if user doesn't have publish post permission.
                         $newposts_array[$post_count] = array($currentpost,$newposts,$newtags,$count,$datestart,$dateend,$draftstatus,$nd_user_id);
                         if($nd_maxcount == 1) array_push($newposts_array[$post_count],$bookmark);
                         $post_count++;
@@ -1184,7 +1183,6 @@ function neop_pstlcs_post_new($automatic = 1) {
                     }
                 } // If filtered
             } // foreach items in feed
-            // TODO: Check user capabilities; force "draftstatus" to draft (not publish) if user doesn't have publish post permission.
             $newposts_array[$post_count] = array($currentpost,$newposts,$newtags,$count,$datestart,$dateend,$draftstatus,$nd_user_id);
             $post_count++;
 
@@ -1497,6 +1495,12 @@ function neop_pstlcs_push_post($postarray,$ptimeraw) {
 			$parray['post_status'] = 'draft'; // Posts are published as drafts so the time doesn't matter.
 		}
 	} else $post_status = $draftstatus; // We created or updated a draft.
+
+	// Users of this blog who can not publish posts should not be able to do so.
+	set_current_user($nd_user_id);
+	if ($nd_poststatus == 'publish' && !current_user_can('publish_posts')) {
+		$post_status = 'pending';
+	}
 
 	if(!isset($parray['post_status'])) $parray['post_status'] = $post_status;
 
