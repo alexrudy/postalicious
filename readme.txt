@@ -2,9 +2,9 @@
 Contributors: neop
 Donate link: http://neop.gbtopia.com/?p=108
 Tags: bookmarks, delicious, ma.gnolia, Google Reader, Reddit, Yahoo Pipes
-Requires at least: 2.1
+Requires at least: 2.3
 Tested up to: 3.0.1
-Stable tag: 2.9
+Stable tag: 2.9.1
 
 Postalicious is a WordPress plugin that automatically posts your delicious, ma.gnolia, Google Reader, Reddit, Yahoo Pipes, or Jumptags bookmarks to your blog.
 
@@ -44,11 +44,15 @@ Yes. Just set the both the minimum and the maximum number of bookmarks per post 
 
 = Can Postalicious post bookmarks from multiple feeds? =
 
-Yes, thanks to Meitar Moscovitz (http://maymay.net/) Postalicious can now post bookmarks from multiple feeds. Each WordPress user can specify their own feed in the "Postalicious User Options" section in their profile inside the WordPress admin area. Postalicious will then fetch the newest bookmarks from each user's feed (as well as the default feed in Postalicious settings page) and post all of the bookmarks together in a single post. Unfortunately, all of the specified feeds must use the same service for this to work properly. 
+Yes, thanks to [Meitar Moscovitz](http://maymay.net/), Postalicious can now post bookmarks from multiple feeds. Each WordPress user can specify their own feed in the "Postalicious User Options" section in their profile inside the WordPress admin area. Postalicious will then fetch the newest bookmarks from each user's feed (as well as the default feed in Postalicious settings page) and post all of the bookmarks together in a single post. Unfortunately, all of the specified feeds must use the same service for this to work properly.
+
+= Why aren't the feeds from some of my users publishing? =
+
+Postalicious is careful to honor the blog's user permissions. Double-check that the user whose feed content is not getting published [has the capability to publish posts](http://codex.wordpress.org/Roles_and_Capabilities#publish_posts). Typically, this requires the user to be an `Author`, `Editor`, or `Administrator` on your blog. In a default installation, `Contributor` or `Subscriber` feed content will be added to your WordPress blog as "Pending Review" even if Postalicious is configured to publish posts instead of creating new drafts.
 
 = Why are tag-related features disabled? =
 
-Reddit and Yahoo Pipes do not support tags. Google Reader does support tags, but those tags are not available in the RSS feed, therefore POstalicious can't fetch them. 
+Reddit and Yahoo Pipes do not support tags. Google Reader does support tags, but those tags are not available in the RSS feed, therefore POstalicious can't fetch them.
 
 == Usage ==
 
@@ -65,7 +69,11 @@ Postalicious is very easy to use. You only need to set up your preferences and t
 * Filter the bookmarks that are posted to your blog depending on how you tagged them.
 * Logs all the activity so that you know what Postalicious did and when.
 
-== Version History ==
+== Changelog ==
+
+= Version 2.9.1 =
+
+* Postalicious now honors user capabilities; if a user can not publish posts on the blog, then their feed content will be inserted as Pending Review instead of Published even if Postalicious is configured to publish posts (instead of creating draft posts).
 
 = Version 2.9 =
 
@@ -98,7 +106,7 @@ Postalicious is very easy to use. You only need to set up your preferences and t
 * Added Jumptags support.
 * Fixed a few minor bugs.
 * Fixed a few typos.
-* General code cleanup. 
+* General code cleanup.
 
 = Version 2.6 =
 
