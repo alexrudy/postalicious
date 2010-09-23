@@ -52,7 +52,7 @@ Postalicious is careful to honor the blog's user permissions. Double-check that 
 
 = Why are tag-related features disabled? =
 
-Reddit and Yahoo Pipes do not support tags. Google Reader does support tags, but those tags are not available in the RSS feed, therefore POstalicious can't fetch them. 
+Reddit and Yahoo Pipes do not support tags. Google Reader does support tags, but those tags are not available in the RSS feed, therefore POstalicious can't fetch them.
 
 == Usage ==
 
@@ -106,7 +106,7 @@ Postalicious is very easy to use. You only need to set up your preferences and t
 * Added Jumptags support.
 * Fixed a few minor bugs.
 * Fixed a few typos.
-* General code cleanup. 
+* General code cleanup.
 
 = Version 2.6 =
 
