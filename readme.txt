@@ -4,7 +4,7 @@ Donate link: http://neop.gbtopia.com/?p=108
 Tags: bookmarks, delicious, ma.gnolia, Google Reader, Reddit, Yahoo Pipes
 Requires at least: 2.3
 Tested up to: 3.0.1
-Stable tag: 2.9.1
+Stable tag: 2.9.3
 
 Postalicious is a WordPress plugin that automatically posts your delicious, ma.gnolia, Google Reader, Reddit, Yahoo Pipes, or Jumptags bookmarks to your blog.
 
@@ -70,6 +70,11 @@ Postalicious is very easy to use. You only need to set up your preferences and t
 * Logs all the activity so that you know what Postalicious did and when.
 
 == Changelog ==
+
+= Version 2.9.3 =
+
+* Add `%author_name%` and `%source_link%` template variables (in Delicious.com service only).
+* Minor formatting improvements on settings page.
 
 = Version 2.9.2 =
 

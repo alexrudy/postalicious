@@ -3,7 +3,7 @@
 Plugin Name: Postalicious
 Plugin URI: http://neop.gbtopia.com/?p=108
 Description: Automatically create posts with your delicious bookmarks.
-Version: 2.9.2
+Version: 2.9.3
 Author: Pablo Gomez
 Author URI: http://neop.gbtopia.com
 */
@@ -615,7 +615,7 @@ function neop_pstlcs_options() {
 		<th><label for="nd_linktemplate">Bookmark</label></th>
 		<td>
 		<input name="nd_linktemplate" type="text" id="nd_linktemplate" value="<?php echo $nd_linktemplate; ?>" size="75" onchange="this.form.nd_settingschanged.value=1" /><br />
-		<span id="nd_linktemplate_content" class="setting-description">The following will be replaced with the bookmark's info: %href% - url, %title% - description, %description% - extended description %date% - date added and %tag% - tags <?php if(MAGPIE_MOD_VERSION != 'neop' && $nd_service == 1) echo '( %tags% will always be "none" )' ?></span>
+		<span id="nd_linktemplate_content" class="setting-description">The following will be replaced with the bookmark's info: <code>%href%</code> - url, <code>%title%</code> - description, <code>%description%</code> - extended description, <code>%date%</code> - date added and <code>%tag%</code> - tags <?php if(MAGPIE_MOD_VERSION != 'neop' && $nd_service == 1) echo '( %tags% will always be "none" )' ?><br />If using Delicious.com only: <code>%author_name%</code> - delicious username, <code>%source_link%</code> - permalink to bookmark on Delicious.com</span>
 		</td></tr>
 		<tr valign="top">
 		<th><label for="nd_tagtemplate">Tag</label></th>
@@ -997,6 +997,9 @@ function neop_pstlcs_post_new($automatic = 1) {
             }
 
             foreach(array_reverse($feed->get_items()) as $item) {
+
+                $item_author = $item->get_author();
+
                 // Consolidate the info from the feed in a single array so that we can use that instead of the service specific ones.
                 switch($service) { // [SERVICE]
                     case 0: // delicious
@@ -1004,6 +1007,11 @@ function neop_pstlcs_post_new($automatic = 1) {
                         $bookmark['link'] = $item->get_link();
                         $bookmark['description'] = $item->get_description();
                         $bookmark['date'] = $item->get_date('Y-m-d H:i:s T');
+                        if (NULL !== $item_author) {
+                            $bookmark['author_name'] = $item_author->get_name();
+                            $bookmark['author_link'] = $item_author->get_link();
+                        }
+                        $bookmark['source_link'] = $item->get_id();
 
                         $arr = $item->get_item_tags('', 'category');
                         $bookmark['tags'] = '';
@@ -1015,6 +1023,11 @@ function neop_pstlcs_post_new($automatic = 1) {
                         $bookmark['link'] = $item->get_link();
                         $bookmark['description'] = $item->get_description();
                         $bookmark['date'] = $item->get_date('Y-m-d H:i:s T');
+                        if (NULL !== $item_author) {
+                            $bookmark['author_name'] = $item_author->get_name();
+                            $bookmark['author_link'] = $item_author->get_link();
+                        }
+                        $bookmark['source_link'] = $item->get_id();
 
                         $arr = $item->get_item_tags('', 'category');
                         $bookmark['tags'] = '';
@@ -1026,6 +1039,7 @@ function neop_pstlcs_post_new($automatic = 1) {
                         $bookmark['link'] = $item->get_link();
                         $bookmark['description'] = neop_pstlcs_arrelm($item->get_item_tags('http://www.google.com/schemas/reader/atom/', 'annotation'),0,'child','http://www.w3.org/2005/Atom','content',0,'data');
                         $bookmark['date'] = $item->get_date('Y-m-d H:i:s T');
+                        // No author_name, author_link, or source_link because Google Reader doesn't create individual pages from shared items.
                         $bookmark['tags'] = '';
                         break;
                     case 3 : // Google Bookmarks
@@ -1044,6 +1058,7 @@ function neop_pstlcs_post_new($automatic = 1) {
                         $bookmark['link'] = $item->get_link();
                         $bookmark['description'] = $item->get_description();
                         $bookmark['date'] = $item->get_date('Y-m-d H:i:s T');
+                        // No author_name, author_link, or source_link because Reddit doesn't offer this info in its feeds.
                         $bookmark['tags'] = '';
                         break;
                     case 5 : // Yahoo pipes
@@ -1051,6 +1066,11 @@ function neop_pstlcs_post_new($automatic = 1) {
                         $bookmark['link'] = $item->get_link();
                         $bookmark['description'] = $item->get_description();
                         $bookmark['date'] = $item->get_date('Y-m-d H:i:s T');
+                        if (NULL !== $item_author) {
+                            $bookmark['author_name'] = $item_author->get_name();
+                            $bookmark['author_link'] = $item_author->get_link();
+                        }
+                        $bookmark['source_link'] = $item->get_id();
                         $bookmark['tags'] = '';
                         break;
                     case 6 : // Jumptags
@@ -1058,6 +1078,11 @@ function neop_pstlcs_post_new($automatic = 1) {
                         $bookmark['link'] = $item->get_link();
                         $bookmark['description'] = $item->get_description();
                         $bookmark['date'] = $item->get_date('Y-m-d H:i:s T');
+                        if (NULL !== $item_author) {
+                            $bookmark['author_name'] = $item_author->get_name();
+                            $bookmark['author_link'] = $item_author->get_link();
+                        }
+                        $bookmark['source_link'] = $item->get_id();
 
                         $arr = $item->get_item_tags('', 'category');
                         $bookmark['tags'] = '';
@@ -1118,6 +1143,10 @@ function neop_pstlcs_post_new($automatic = 1) {
                         // Add the description to $currentlink but with the proper html tags escaped.
                         $bookmark['description'] = preg_replace($pattern,$replacement,htmlentities($bookmark['description'],ENT_QUOTES,"UTF-8",FALSE));
                         $currentlink = str_replace("%description%",$bookmark['description'],$currentlink);
+                        // Add the author information to $currentlink
+                        $currentlink = str_replace("%author_name%",$bookmark['author_name'],$currentlink);
+                        $currentlink = str_replace("%author_link%",$bookmark['author_link'],$currentlink);
+                        $currentlink = str_replace("%source_link%",$bookmark['source_link'],$currentlink);
                     } else {
                         $bookmark['title'] = @html_entity_decode($bookmark['title'],ENT_QUOTES,"UTF-8");
                         $bookmark['title'] = htmlentities($bookmark['title'],ENT_QUOTES,"UTF-8");
@@ -1126,6 +1155,9 @@ function neop_pstlcs_post_new($automatic = 1) {
                         $bookmark['description'] = htmlentities($bookmark['description'],ENT_QUOTES,"UTF-8");
                         $bookmark['description'] = preg_replace($pattern,$replacement,$bookmark['description']);
                         $currentlink = str_replace("%description%",$bookmark['description'],$currentlink);
+                        $currentlink = str_replace("%author_name%",$bookmark['author_name'],$currentlink);
+                        $currentlink = str_replace("%author_link%",$bookmark['author_link'],$currentlink);
+                        $currentlink = str_replace("%source_link%",$bookmark['source_link'],$currentlink);
                     }
                     // Replace dates
                     if(!($nd_datetemplate = get_option('nd_datetemplate'))) $nd_datetemplate = 'F jS';
