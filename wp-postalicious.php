@@ -649,7 +649,7 @@ endif;
 if (!function_exists('neop_pstlcs_add_options')) :
 function neop_pstlcs_add_options() {
 	if (function_exists('neop_pstlcs_options')) {
-		add_options_page('Postalicious', 'Postalicious', 6, 'wp-postalicious', 'neop_pstlcs_options');
+		add_options_page('Postalicious', 'Postalicious', 'manage_options', 'wp-postalicious', 'neop_pstlcs_options');
 	}
 }
 endif;
