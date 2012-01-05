@@ -3,13 +3,13 @@
 Plugin Name: Postalicious
 Plugin URI: http://neop.gbtopia.com/?p=108
 Description: Automatically create posts with your delicious bookmarks.
-Version: 2.9.1
+Version: 3.0.1
 Author: Pablo Gomez
 Author URI: http://neop.gbtopia.com
 */
 
 if (!defined('POSTALICIOUS_UA_STRING')) {
-    define('POSTALICIOUS_UA_STRING', 'Postalicious 2.9');
+    define('POSTALICIOUS_UA_STRING', 'Postalicious 3.0');
 }
 
 if (!function_exists('neop_pstlcs_options')) :
@@ -23,7 +23,6 @@ function neop_pstlcs_options() {
 		update_option('nd_logcount',0);
 		exit(0); // Only AJAX requests should get here so there's no reason to continue executing.
 	}
-
 
 	if(!class_exists('SimplePie')) {
 		if(file_exists(ABSPATH . WPINC . '/class-simplepie.php'))
@@ -149,7 +148,7 @@ function neop_pstlcs_options() {
 			if(!($service = get_option('nd_service'))) $service = 0;
 			$username = get_option('nd_username');
 			if($username) {
-				$rssurl = neop_pstlcs_get_service_url_by_id($service, $username);
+				$rssurl = $username;
 				$feed = new SimplePie();
 				$feed->set_useragent(POSTALICIOUS_UA_STRING);
 				$feed->set_feed_url($rssurl);
@@ -186,6 +185,65 @@ function neop_pstlcs_options() {
 		if($message != '') $message .= '<br />';
 		$message .= neop_pstlcs_post_new(0);
 	}
+	
+	if(isset($_POST['nd_resetsettings'])) {
+		// Reset all the settings.
+		delete_option('nd_log');
+		delete_option('nd_logcount');
+		delete_option('nd_service');
+		delete_option('nd_username');
+		delete_option('nd_idforposts');
+		delete_option('nd_catforposts');
+		delete_option('nd_allowcomments');
+		delete_option('nd_allowpings');
+		delete_option('nd_mincount');
+		delete_option('nd_maxcount');
+		delete_option('nd_maxhours');
+		delete_option('nd_post_time');
+		delete_option('nd_post_hour');
+		delete_option('nd_post_minutes');
+		delete_option('nd_post_meridian');
+		delete_option('nd_publishmissed');
+		delete_option('nd_poststatus');
+		delete_option('nd_publishbehaviour');
+		delete_option('nd_htmltags');
+		delete_option('nd_whitelist');
+		delete_option('nd_blacklist');
+		delete_option('nd_datetemplate');
+		delete_option('nd_slugtemplate');
+		delete_option('nd_titlesingle');
+		delete_option('nd_titledouble');
+		delete_option('nd_linktemplate');
+		delete_option('nd_tagtemplate');
+		delete_option('nd_posttsingle');
+		delete_option('nd_posttdouble');
+		delete_option('nd_excerptsingle');
+		delete_option('nd_excerptdouble');
+		delete_option('nd_use_post_tags');
+		delete_option('nd_post_tags');
+		delete_option('nd_hourlyupdates');
+		delete_option('nd_tagging_enabled');
+		delete_option('nd_use_del_tags');
+		delete_option('nd_utw_enabled');
+		delete_option('nd_draftdate2');
+		delete_option('nd_version');
+		delete_option('nd_lastrun');
+		delete_option('nd_updating');
+		delete_option('nd_failedcount');
+		delete_option('nd_lastupdate');
+		delete_option('nd_lastpostdate');
+		delete_option('nd_queue_count');
+		delete_option('nd_queue_time');
+		delete_option('nd_trackedposts');
+		delete_option('nd_draftcontent');
+		delete_option('nd_unpublishedcount');
+		delete_option('nd_draftdate');
+		delete_option('nd_drafttags');
+		delete_option('nd_lastdraftid');
+		delete_option('nd_draft_time');
+		$message = 'The settings were reset successfully.';
+	}
+	
 	if($message != '') { ?>
 		<div id="message" class="updated fade"><p style="line-height:150%"><strong>
 		<?php echo $message; ?>
@@ -250,9 +308,7 @@ function neop_pstlcs_options() {
 
 	// [SERVICE]
 	$tagsdisabled = 0;
-	if($nd_service == 2 || $nd_service == 4 || $nd_service == 5) $tagsdisabled = 1;
-	$urlservice = 1;
-	if($nd_service == 1 || $nd_service == 6) $urlservice = 0;
+	if($nd_service == 2 || $nd_service == 4 || $nd_service == 5 || $nd_service == 8) $tagsdisabled = 1;
 
 ?>
 	<script type="text/javascript">
@@ -263,23 +319,20 @@ function neop_pstlcs_options() {
 	function nd_servicechanged() {
 		oldservice = nd_service_js;
 		if(document.getElementById('nd_service_0').checked) nd_service_js = 0;
-		else if(document.getElementById('nd_service_1').checked) nd_service_js = 1;
 		else if(document.getElementById('nd_service_2').checked) nd_service_js = 2;
 		else if(document.getElementById('nd_service_4').checked) nd_service_js = 4;
 		else if(document.getElementById('nd_service_5').checked) nd_service_js = 5;
 		else if(document.getElementById('nd_service_6').checked) nd_service_js = 6;
+		else if(document.getElementById('nd_service_7').checked) nd_service_js = 7;
+		else if(document.getElementById('nd_service_8').checked) nd_service_js = 8;
 
 		if(oldservice != nd_service_js) document.nd_settingsform.nd_settingschanged.value = "1";
 		// [SERVICE]
 		nd_status = function (type,service) { // We only use this inside nd_toggle, so no need for a global function.
 			switch(type) {
 				case 'tags' :
-					if(service == 2 || service == 4 || service == 5) return 1;
+					if(service == 2 || service == 4 || service == 5 || service == 8) return 1;
 					else return 0;
-					break;
-				case 'url' :
-					if(service == 1 || service == 6) return 0;
-					else return 1;
 					break;
 			}
 		}
@@ -300,19 +353,6 @@ function neop_pstlcs_options() {
 				document.getElementById('nd_use_post_tags_row').style.visibility = 'visible';
 				document.getElementById('nd_whitelist_row').style.visibility = 'visible';
 				document.getElementById('nd_blacklist_row').style.visibility = 'visible';
-			}
-		}
-
-		old_urlservice = nd_status('url',oldservice);
-		new_urlservice = nd_status('url',nd_service_js);
-
-		if(old_urlservice != new_urlservice) {
-			if(new_urlservice == 1) {
-				document.getElementById('th_username').innerHTML = "Feed URL";
-				document.getElementById('nd_username').size = "50";
-			} else {
-				document.getElementById('th_username').innerHTML = "Username";
-				document.getElementById('nd_username').size = "15";
 			}
 		}
 	}
@@ -416,8 +456,6 @@ function neop_pstlcs_options() {
 		<td><fieldset>
 		<label><input id="nd_service_0" name="nd_service" type="radio" value="0" <?php if($nd_service == 0) echo 'checked="checked"' ?> onclick="nd_servicechanged();" />
 		delicious</label><br />
-		<label><input id="nd_service_1" name="nd_service" type="radio" value="1" <?php if($nd_service == 1) echo 'checked="checked"' ?> onclick="nd_servicechanged();" />
-		ma.gnolia</label><br />
 		<label><input id="nd_service_2" name="nd_service" type="radio" value="2" <?php if($nd_service == 2) echo 'checked="checked"' ?> onclick="nd_servicechanged();" />
 		Google Reader</label><br />
 		<label><input id="nd_service_4" name="nd_service" type="radio" value="4" <?php if($nd_service == 4) echo 'checked="checked"' ?> onclick="nd_servicechanged();" />
@@ -425,13 +463,17 @@ function neop_pstlcs_options() {
 		<label><input id="nd_service_5" name="nd_service" type="radio" value="5" <?php if($nd_service == 5) echo 'checked="checked"' ?> onclick="nd_servicechanged();" />
 		Yahoo Pipes</label><br />
 		<label><input id="nd_service_6" name="nd_service" type="radio" value="6" <?php if($nd_service == 6) echo 'checked="checked"' ?> onclick="nd_servicechanged();" />
-		Jumptags</label>
+		Jumptags</label><br />
+		<label><input id="nd_service_7" name="nd_service" type="radio" value="7" <?php if($nd_service == 7) echo 'checked="checked"' ?> onclick="nd_servicechanged();" />
+		Pinboard</label><br />
+		<label><input id="nd_service_8" name="nd_service" type="radio" value="8" <?php if($nd_service == 8) echo 'checked="checked"' ?> onclick="nd_servicechanged();" />
+		Diigo</label>
 		</fieldset></td>
 		</tr>
 		<tr valign="top">
-		<th id="th_username"><label for="nd_username"><?php if($urlservice) echo "Feed URL"; else echo "Username"?></label></th>
+		<th id="th_username"><label for="nd_username">Feed URL</label></th>
 		<td colspan="2">
-		<input name="nd_username" type="text" id="nd_username" value="<?php echo $nd_username; ?>" size="<?php if($urlservice) echo "50"; else echo "15";?>" onchange="this.form.nd_settingschanged.value=1" />
+		<input name="nd_username" type="text" id="nd_username" value="<?php echo $nd_username; ?>" size="50" onchange="this.form.nd_settingschanged.value=1" />
 		</td></tr>
 		</table>
 		<h3>Post settings</h3>
@@ -615,7 +657,7 @@ function neop_pstlcs_options() {
 		<th><label for="nd_linktemplate">Bookmark</label></th>
 		<td>
 		<input name="nd_linktemplate" type="text" id="nd_linktemplate" value="<?php echo $nd_linktemplate; ?>" size="75" onchange="this.form.nd_settingschanged.value=1" /><br />
-		<span id="nd_linktemplate_content" class="setting-description">The following will be replaced with the bookmark's info: %href% - url, %title% - description, %description% - extended description %date% - date added and %tag% - tags <?php if(MAGPIE_MOD_VERSION != 'neop' && $nd_service == 1) echo '( %tags% will always be "none" )' ?></span>
+		<span id="nd_linktemplate_content" class="setting-description">The following will be replaced with the bookmark's info: <code>%href%</code> - url, <code>%title%</code> - description, <code>%description%</code> - extended description, <code>%date%</code> - date added and <code>%tag%</code> - tags <?php if(MAGPIE_MOD_VERSION != 'neop' && $nd_service == 1) echo '( %tags% will always be "none" )' ?><br />If using Delicious.com only: <code>%author_name%</code> - delicious username, <code>%source_link%</code> - permalink to bookmark on Delicious.com</span>
 		</td></tr>
 		<tr valign="top">
 		<th><label for="nd_tagtemplate">Tag</label></th>
@@ -639,6 +681,7 @@ function neop_pstlcs_options() {
 		<h3>Activity Log</h3>
 		<textarea readonly="readonly" name="nd_log" id="nd_log" style="width: 98%;" rows="20" cols="50"><?php echo $nd_log; ?></textarea>
 		<input type="button" class="button-secondary" value="Clear Log" onclick="nd_clearthelog()" /><span id="nd_clogspan" style="margin-left:5px;"></span>
+		<br /><br /><input type="submit" name="nd_resetsettings" class="button-secondary" value="Reset All Settings" onclick="return confirm('Are you sure you want to reset all settings?')" />
 		<div class="submit"><input type="submit" name="save_changes" class="button-primary" value="Save Changes" onclick="nd_submitbutton = 0" /></div>
 		</form>
 	</div>
@@ -691,39 +734,20 @@ if (!function_exists('neop_pstlcs_get_service_name_by_id')) :
 function neop_pstlcs_get_service_name_by_id($x) {
     switch ($x) {
         case 0: return 'delicious';
-        case 1: return 'ma.gnolia';
         case 2: return 'Google Reader';
-        case 3: return 'Reddit';
-        case 4: return 'Yahoo Pipes';
-        case 5: return 'Jumptags';
-    }
-}
-endif;
-
-/**
- * Simple service info to feed URL mapping function.
- *
- * @param $srv_id int The internal service ID number.
- * @param $user string The username component of the URL, or the feed itself (depending on service).
- * @return string The correct URL from which to obtain the feed.
- */
-if (!function_exists('neop_pstlcs_get_service_url_by_id')) :
-function neop_pstlcs_get_service_url_by_id($srv_id, $user) {
-    switch($srv_id) {
-        case 0 : return $user; // delicious
-        case 1 : return 'http://ma.gnolia.com/rss/lite/people/'.urlencode($user); // ma.gnolia
-        case 2 : return $user; // Google Reader
-        case 3 : return $user; // Google Bookmarks
-        case 4 : return $user; // Reddit
-        case 5 : return $user; // Yahoo Pipes
-        case 6 : return 'http://www.jumptags.com/'.urlencode($user).'?rss=xml'; // Jumptags
+		case 3: return 'Google Bookmarks';
+        case 4: return 'Reddit';
+        case 5: return 'Yahoo Pipes';
+        case 6: return 'Jumptags';
+		case 7: return 'Pinboard';
+		case 8: return 'Diigo';
     }
 }
 endif;
 
 if (!function_exists('neop_pstlcs_update')) :
 function neop_pstlcs_update() {
-	if(!($nd_version = get_option('nd_version'))) $nd_version = 280; // Because of a bug in 121, get_option('nd_version') will always be at least 150
+	if(!($nd_version = get_option('nd_version'))) $nd_version = 300; // Because of a bug in 121, get_option('nd_version') will always be at least 150
 	if($nd_version < 121) {
 		if(get_option('nd_utw_enabled') == 'yes') {
 			update_option('nd_tagging_enabled','yes');
@@ -836,6 +860,13 @@ function neop_pstlcs_update() {
 			update_option('nd_username','http://feeds.delicious.com/v2/rss/'.urlencode(get_option('nd_username')));
 		$nd_version = 280;
 	}
+	if($nd_version < 300) {
+		// All services are now url services, so change usernames into urls.
+		$service = get_option('nd_service');       
+		if($service == 1) update_option('nd_username','http://ma.gnolia.com/rss/lite/people/'.urlencode(get_option('nd_username')));
+		else if($service == 6) update_option('nd_username','http://www.jumptags.com/'.urlencode(get_option('nd_username')).'?rss=xml');
+		$nd_version = 300;
+	}
 	update_option('nd_version',$nd_version);
 }
 endif;
@@ -869,8 +900,8 @@ function neop_pstlcs_post_new($automatic = 1) {
 	if(!($service = get_option('nd_service'))) $service = 0;
 	$username = get_option('nd_username');
 
-	if($username) { // [SERVICE]
-        $rssurl = neop_pstlcs_get_service_url_by_id($service, $username);
+	if($username) {
+        $rssurl = $username;
 	}
 	else {
 		$lastrun = time();
@@ -978,9 +1009,9 @@ function neop_pstlcs_post_new($automatic = 1) {
             $nd_htmltags = get_option('nd_htmltags');
 
             switch($service) { // [SERVICE] Some services need certain tags to be allowed.
-                case 1 : $nd_htmltags .= 'p,strong,a,img'; break; // ma.gnolia
                 case 2 : $nd_htmltags .= 'br'; break; // Google Reader
                 case 4 : $nd_htmltags = 'a,br'; break; // Reddit (the user's allowed tags don't matter)
+				case 8 : $nd_htmltags .= 'a,p,strong'; break; // Diigo
             }
 
             if($nd_htmltags) {
@@ -997,6 +1028,9 @@ function neop_pstlcs_post_new($automatic = 1) {
             }
 
             foreach(array_reverse($feed->get_items()) as $item) {
+
+                $item_author = $item->get_author();
+
                 // Consolidate the info from the feed in a single array so that we can use that instead of the service specific ones.
                 switch($service) { // [SERVICE]
                     case 0: // delicious
@@ -1004,17 +1038,11 @@ function neop_pstlcs_post_new($automatic = 1) {
                         $bookmark['link'] = $item->get_link();
                         $bookmark['description'] = $item->get_description();
                         $bookmark['date'] = $item->get_date('Y-m-d H:i:s T');
-
-                        $arr = $item->get_item_tags('', 'category');
-                        $bookmark['tags'] = '';
-                        if($arr) foreach($arr as $arritm) $bookmark['tags'] .= ",{$arritm['data']}";
-                        $bookmark['tags'] = ltrim($bookmark['tags'],",");
-                        break;
-                    case 1: // ma.gnolia
-                        $bookmark['title'] = $item->get_title();
-                        $bookmark['link'] = $item->get_link();
-                        $bookmark['description'] = $item->get_description();
-                        $bookmark['date'] = $item->get_date('Y-m-d H:i:s T');
+                        if (NULL !== $item_author) {
+                            $bookmark['author_name'] = $item_author->get_name();
+                            $bookmark['author_link'] = $item_author->get_link();
+                        }
+                        $bookmark['source_link'] = $item->get_id();
 
                         $arr = $item->get_item_tags('', 'category');
                         $bookmark['tags'] = '';
@@ -1026,6 +1054,7 @@ function neop_pstlcs_post_new($automatic = 1) {
                         $bookmark['link'] = $item->get_link();
                         $bookmark['description'] = neop_pstlcs_arrelm($item->get_item_tags('http://www.google.com/schemas/reader/atom/', 'annotation'),0,'child','http://www.w3.org/2005/Atom','content',0,'data');
                         $bookmark['date'] = $item->get_date('Y-m-d H:i:s T');
+                        // No author_name, author_link, or source_link because Google Reader doesn't create individual pages from shared items.
                         $bookmark['tags'] = '';
                         break;
                     case 3 : // Google Bookmarks
@@ -1044,6 +1073,7 @@ function neop_pstlcs_post_new($automatic = 1) {
                         $bookmark['link'] = $item->get_link();
                         $bookmark['description'] = $item->get_description();
                         $bookmark['date'] = $item->get_date('Y-m-d H:i:s T');
+                        // No author_name, author_link, or source_link because Reddit doesn't offer this info in its feeds.
                         $bookmark['tags'] = '';
                         break;
                     case 5 : // Yahoo pipes
@@ -1051,6 +1081,11 @@ function neop_pstlcs_post_new($automatic = 1) {
                         $bookmark['link'] = $item->get_link();
                         $bookmark['description'] = $item->get_description();
                         $bookmark['date'] = $item->get_date('Y-m-d H:i:s T');
+                        if (NULL !== $item_author) {
+                            $bookmark['author_name'] = $item_author->get_name();
+                            $bookmark['author_link'] = $item_author->get_link();
+                        }
+                        $bookmark['source_link'] = $item->get_id();
                         $bookmark['tags'] = '';
                         break;
                     case 6 : // Jumptags
@@ -1058,11 +1093,43 @@ function neop_pstlcs_post_new($automatic = 1) {
                         $bookmark['link'] = $item->get_link();
                         $bookmark['description'] = $item->get_description();
                         $bookmark['date'] = $item->get_date('Y-m-d H:i:s T');
+                        if (NULL !== $item_author) {
+                            $bookmark['author_name'] = $item_author->get_name();
+                            $bookmark['author_link'] = $item_author->get_link();
+                        }
+                        $bookmark['source_link'] = $item->get_id();
 
                         $arr = $item->get_item_tags('', 'category');
                         $bookmark['tags'] = '';
                         if($arr) foreach($arr as $arritm) $bookmark['tags'] .= ",{$arritm['data']}";
                         $bookmark['tags'] = ltrim($bookmark['tags'],",");
+						break;
+					case 7: // Pinboard
+                        $bookmark['title'] = $item->get_title();
+                        $bookmark['link'] = $item->get_link();
+                        $bookmark['description'] = $item->get_description();
+                        $bookmark['date'] = $item->get_date('Y-m-d H:i:s T');
+                        if (NULL !== $item_author) {
+                            $bookmark['author_name'] = $item_author->get_name();
+                            $bookmark['author_link'] = $item_author->get_link();
+                        }
+                        $bookmark['source_link'] = $item->get_id();
+						
+						$bookmark['tags'] = str_replace(' ',',',neop_pstlcs_arrelm($item->get_item_tags('http://purl.org/dc/elements/1.1/','subject'),0,'data'));						
+                        break;
+					case 8 : // Diigo
+						 $bookmark['title'] = $item->get_title();
+                        $bookmark['link'] = $item->get_link();
+                        $bookmark['description'] = $item->get_description();
+                        $bookmark['date'] = $item->get_date('Y-m-d H:i:s T');
+                        if (NULL !== $item_author) {
+                            $bookmark['author_name'] = $item_author->get_name();
+                            $bookmark['author_link'] = $item_author->get_link();
+                        }
+                        $bookmark['source_link'] = $item->get_id();
+
+						$bookmark['tags'] = '';						
+                        break;
                 }
 
                 $ptime = strtotime($bookmark['date']);
@@ -1118,6 +1185,10 @@ function neop_pstlcs_post_new($automatic = 1) {
                         // Add the description to $currentlink but with the proper html tags escaped.
                         $bookmark['description'] = preg_replace($pattern,$replacement,htmlentities($bookmark['description'],ENT_QUOTES,"UTF-8",FALSE));
                         $currentlink = str_replace("%description%",$bookmark['description'],$currentlink);
+                        // Add the author information to $currentlink
+                        $currentlink = str_replace("%author_name%",$bookmark['author_name'],$currentlink);
+                        $currentlink = str_replace("%author_link%",$bookmark['author_link'],$currentlink);
+                        $currentlink = str_replace("%source_link%",$bookmark['source_link'],$currentlink);
                     } else {
                         $bookmark['title'] = @html_entity_decode($bookmark['title'],ENT_QUOTES,"UTF-8");
                         $bookmark['title'] = htmlentities($bookmark['title'],ENT_QUOTES,"UTF-8");
@@ -1126,6 +1197,9 @@ function neop_pstlcs_post_new($automatic = 1) {
                         $bookmark['description'] = htmlentities($bookmark['description'],ENT_QUOTES,"UTF-8");
                         $bookmark['description'] = preg_replace($pattern,$replacement,$bookmark['description']);
                         $currentlink = str_replace("%description%",$bookmark['description'],$currentlink);
+                        $currentlink = str_replace("%author_name%",$bookmark['author_name'],$currentlink);
+                        $currentlink = str_replace("%author_link%",$bookmark['author_link'],$currentlink);
+                        $currentlink = str_replace("%source_link%",$bookmark['source_link'],$currentlink);
                     }
                     // Replace dates
                     if(!($nd_datetemplate = get_option('nd_datetemplate'))) $nd_datetemplate = 'F jS';
@@ -1138,13 +1212,26 @@ function neop_pstlcs_post_new($automatic = 1) {
                     $tag = '';
                     if($bookmark['tags'] != '') {
                         switch($service) { // [SERVICE]
-                            case 0 : $nd_site_tagurl = "http://delicious.com/{$username}/"; break; //delicious
-                            case 1 : $nd_site_tagurl = "http://ma.gnolia.com/people/{$username}/tags/"; break; // ma.gnolia
+                            case 0 : //delicious
+                            	$tagUsername = preg_replace('/http:\/\/feeds.delicious.com\/v2\/rss\/([^?\/]*).*/','$1',$username);
+                            	if($tagUsername == $username) $nd_site_tagurl = 'http://www.delicious.com/tag/'; // $username is an unrecognized url.
+                            	else  $nd_site_tagurl = "http://www.delicious.com/{$tagUsername}/";
+                            	break; 
                             case 2 : $nd_site_tagurl = '#'; break; // Google Reader (we should never get here)
                             case 3 : $nd_site_tagurl = '#'; break; // Google Bookmarks does not have a public tag url.
                             case 4 : $nd_site_tagurl = '#'; break; // Reddit (we should never get here)
                             case 5 : $nd_site_tagurl = '#'; break; // Yahoo pipes (we should never get here)
-                            case 6 : $nd_site_tagurl = "http://www.jumptags.com/{$username}/"; break; // Jumptags
+                            case 6 : // Jumptags
+								$tagUsername = preg_replace('/http:\/\/www.jumptags.com\/([^?]*).*?rss=xml/','$1',$username);
+								if($tagUsername == $username) $nd_site_tagurl = 'http://www.jumptags.com/topic/'; // $username is an unrecognized url.
+								else  $nd_site_tagurl = "http://www.jumptags.com/{$tagUsername}/";
+								break;
+							case 7 : // Pinboard
+								$tagUsername = preg_replace('/http:\/\/feeds.pinboard.in\/rss\/secret:[^\/]*\/u:([^\/]*).*/','$1',$username);
+								if($tagUsername == $username) $nd_site_tagurl = 'http://pinboard.in/t:'; // $username is an unrecognized url.
+								else  $nd_site_tagurl = "http://pinboard.in/u:{$tagUsername}/t:";
+								break;
+							case 8 : $nd_site_tagurl = '#'; break; // Diigo (we should never get here)
                         }
                         $tags = explode(',',$bookmark['tags']);
                         foreach($tags as $t) {
