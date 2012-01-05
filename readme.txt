@@ -1,20 +1,20 @@
 === Postalicious ===
 Contributors: neop
 Donate link: http://neop.gbtopia.com/?p=108
-Tags: bookmarks, delicious, ma.gnolia, Google Reader, Reddit, Yahoo Pipes
+Tags: bookmarks, delicious, pinboard, diigo, Google Reader, Reddit, Yahoo Pipes, Jumptags
 Requires at least: 2.3
-Tested up to: 3.0.1
-Stable tag: 2.9.1
+Tested up to: 3.0.4
+Stable tag: 3.0
 
-Postalicious is a WordPress plugin that automatically posts your delicious, ma.gnolia, Google Reader, Reddit, Yahoo Pipes, or Jumptags bookmarks to your blog.
+Postalicious is a WordPress plugin that automatically posts your delicious, Google Reader, Reddit, Yahoo Pipes, Jumptags, Pinboard, or Diigo bookmarks to your blog.
 
 == Description ==
 
-Postalicious is a WordPress plugin that automatically posts your delicious, ma.gnolia, Google Reader, Reddit or Yahoo Pipes bookmarks to your blog. The exact details of how your bookmarks are posted are very customizable and are designed to meet your specific needs. Postalicious uses the psuedo-cron functionality introduced in WordPress 2.1 to schedule automatic hourly updates. If you do not have WordPress 2.1 or later installed, you will still be able to use Postalicious, but you will have to perform the updates manually.
+Postalicious is a WordPress plugin that automatically posts your delicious, Google Reader, Reddit, Yahoo Pipes, Jumptags, Pinboard, or Diigo bookmarks to your blog. The exact details of how your bookmarks are posted are very customizable and are designed to meet your specific needs. Postalicious uses the psuedo-cron functionality introduced in WordPress 2.1 to schedule automatic hourly updates. If you do not have WordPress 2.1 or later installed, you will still be able to use Postalicious, but you will have to perform the updates manually.
 
 == Installation ==
 
-Simply copy "wp-postalicious.php" to the "wp-content/plugins/" folder found in your WordPress installation. Then go to the "Plugins" tab inside the WordPress administration website and activate Postalicious. Finally you need to enter your account type (delicious, ma.gnolia, Google Reader, Reddit or Yahoo Pipes) and details as well as other Postalicious preferences in the by clicking the link labeled "Postalicious" inside the "Settings" menu on the navigation bar in the WordPress administration website.
+Simply copy "wp-postalicious.php" to the "wp-content/plugins/" folder found in your WordPress installation. Then go to the "Plugins" tab inside the WordPress administration website and activate Postalicious. Finally you need to enter your account type (delicious, Google Reader, Reddit, Yahoo Pipes, Jumptags, Pinboard, or Diigo) and details as well as other Postalicious preferences in the by clicking the link labeled "Postalicious" inside the "Settings" menu on the navigation bar in the WordPress administration website.
 
 == Frequently Asked Questions ==
 
@@ -52,7 +52,7 @@ Postalicious is careful to honor the blog's user permissions. Double-check that 
 
 = Why are tag-related features disabled? =
 
-Reddit and Yahoo Pipes do not support tags. Google Reader does support tags, but those tags are not available in the RSS feed, therefore POstalicious can't fetch them.
+Not all services support tags, other services do support tags but don't make them available on the RSS feed. In each case I've tried to support tags whenever possible.
 
 == Usage ==
 
@@ -61,7 +61,7 @@ Postalicious is very easy to use. You only need to set up your preferences and t
 == Features ==
 
 * Automatically create posts in your blog with your bookmarks that allow you to keep your blog updated just by bookmarking your favorite websites!
-* Works with delicious, ma.gnolia, Google Reader, Reddit and Yahoo Pipes.
+* Works with delicious, Google Reader, Reddit, Yahoo Pipes, Jumptags, Pinboard, and Diigo.
 * Complete control over how often your bookmarks are posted and how many bookmarks should appear on each post.
 * If the post is not ready for prime time, Postalicious creates a draft with the pending bookmarks which you can publish any time or wait for Postalicious to publish it when it meets your publishing settings.
 * Full customization on the look of posts created by Postalicious, including templates for the post slug, post title, and post body.
@@ -70,6 +70,22 @@ Postalicious is very easy to use. You only need to set up your preferences and t
 * Logs all the activity so that you know what Postalicious did and when.
 
 == Changelog ==
+
+= Version 3.0 =
+
+* Removed gnolia support.
+* Added support for Pinboard and Diigo.
+* Added a button to reset all settings.
+* Cleanup and minor bug fixes.
+
+= Version 2.9.3 =
+
+* Add `%author_name%` and `%source_link%` template variables (in Delicious.com service only). (Thanks Meitar!)
+* Minor formatting improvements on settings page. (Thanks Meitar!)
+
+= Version 2.9.2 =
+
+* Fixed tag urls for delicious.
 
 = Version 2.9.1 =
 
